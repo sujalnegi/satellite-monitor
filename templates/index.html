@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Where is this Satellite?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000000;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 130px 80px, #fff, rgba(0, 0, 0, 0));
+            background-size: 200px 200px;
+            animation: moveStars 100s linear infinite;
+            z-index: 0;
+        }
+        @keyframes moveStars {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: 1000px 500px;
+            }
+        }
+        .container {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            backdrop-filter: blur(2px);
+            padding: 40px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        h1 {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            text-align: center;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.5rem;
+            margin: 0;
+            line-height: 1.5;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+            z-index: 20;
+        }
+        p {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .rocket-container {
+            position: relative;
+            cursor: pointer;
+            display: inline-block;
+            transition: transform 0.3s;
+            margin-top: 20px;
+        }
+
+        .rocket-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .rocket-container:active {
+            transform: scale(0.95);
+        }
+
+        .rocket-svg {
+            width: 80px;
+            height: 140px;
+            filter: drop-shadow(0 0 10px rgba(79, 172, 254, 0.5));
+            transition: filter 0.3s;
+        }
+        .rocket-container:hover .rocket-svg {
+            filter: drop-shadow(0 0 20px rgba(0, 242, 254, 0.8));
+        }
+        .rocket-label {
+            display: block;
+            margin-top: 15px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        .launching .rocket-svg {
+            animation: shake 0.5s ease-in-out infinite, flyUp 1.5s ease-in 0.5s forwards;
+        }
+        .launching .exhaust {
+            opacity: 1;
+            animation: thrust 0.2s ease-in-out infinite;
+        }
+        .exhaust {
+            opacity: 0;
+            fill: #ffce00;
+            transition: opacity 0.3s;
+        }
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-2px);
+            }
+            75% {
+                transform: translateX(2px);
+            }
+        }
+        @keyframes flyUp {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-100vh);
+            }
+        }
+        @keyframes thrust {
+            0%,
+            100% {
+                transform: scaleY(1);
+            }
+            50% {
+                transform: scaleY(1.5);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stars"></div>
+    <h1>Where is this Satellite?</h1>
+    <div class="container">
+        <p>Explore real-time positions of Earth's satellites, tracking the ISS, Hubble, and more in an immersive 3D
+            simulation.</p>
+
+            <!-- rocket -->
+        <div class="rocket-container" onclick="launchRocket()">
+            <svg class="rocket-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#4facfe" d="M144 288v64c0 35.3 28.7 64 64 64v-64c0-17.7-14.3-32-32-32s-32-14.3-32-32z" />
+                <path fill="#4facfe" d="M368 288v64c0 35.3-28.7 64-64 64v-64c0-17.7 14.3-32 32-32s32-14.3 32-32z" />
+
+                <path fill="#e0e0e0"
+                    d="M256 16c-44.2 0-80 35.8-80 80v224c0 44.2 35.8 80 80 80s80-35.8 80-80V96c0-44.2-35.8-80-80-80z" />
+
+                <path fill="#666" d="M256 432c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z" />
+
+                <circle cx="256" cy="160" r="30" fill="#00f2fe" stroke="#333" stroke-width="5" />
+
+                <path fill="#ff6b6b" d="M176 96c0-44.2 35.8-80 80-80s80 35.8 80 80H176z" />
+
+                <path class="exhaust" d="M256 460l-20 60h40l-20-60z" />
+            </svg>
+            <span class="rocket-label">LAUNCH</span>
+        </div>
+    </div>
+
+    <script>
+        function launchRocket() {
+            const container = document.querySelector('.rocket-container');
+            if (container.classList.contains('launching')) return;
+
+            container.classList.add('launching');
+
+            setTimeout(() => {
+                window.location.href = "{{ url_for('simulation') }}";
+            }, 1500);
+        }
+    </script>
+</body>
+
+</html>
+
+
