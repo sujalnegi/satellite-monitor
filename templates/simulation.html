@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earth Satellite Simulation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/5.0.0/satellite.min.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="loading">Loading Simulation...</div>
+    <div id="tooltip"></div>
+
+    <div id="zoom-controls">
+        <button id="zoom-in">+</button>
+        <button id="zoom-out">-</button>
+    </div>
+
+    <div id="main-control-panel"
+        style="position: fixed; bottom: 20px; left: 20px; background: rgba(20, 20, 30, 0.9); padding: 20px; border-radius: 10px; border: 1px solid #444; color: white; z-index: 1000; backdrop-filter: blur(5px); display: flex; flex-direction: column; gap: 15px; width: 220px;">
+
+        <button id="play-pause-btn"
+            style="width: 100%; cursor: pointer; padding: 8px; background: #4facfe; border: none; color: white; border-radius: 5px; font-weight: bold;">Pause</button>
+
+        <div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <label style="color: #4facfe; font-size: 14px;">Sim Speed</label>
+            </div>
+            <input type="range" id="speed-slider" min="0.01" max="10.0" step="0.01" value="0.1" style="width: 100%;">
+        </div>
+    </div>
+
+    <script>
+        window.APP_CONFIG = {
+            earthTextureUrl: "{{ url_for('static', filename='assets/earth_texture.jpg') }}",
+            cloudsTextureUrl: "{{ url_for('static', filename='assets/clouds.png') }}",
+            satellitesDataUrl: "{{ url_for('static', filename='data/satellites.json') }}",
+            assetsBaseUrl: "{{ url_for('static', filename='assets') }}/"
+        };
+    </script>
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
