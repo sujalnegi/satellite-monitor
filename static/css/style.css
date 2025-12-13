@@ -1,0 +1,55 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 24px;
+    pointer-events: none;
+}
+
+#zoom-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+
+#zoom-controls button {
+    background: rgba(40, 40, 40, 0.8);
+    border: 1px solid #666;
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#zoom-controls button:hover {
+    background: rgba(80, 80, 80, 0.9);
+}
+
+#tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    pointer-events: none;
+    display: none;
+    font-size: 12px;
+    border: 1px solid #555;
+    z-index: 1000;
+}
