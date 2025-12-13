@@ -16,21 +16,14 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.minDistance = 60;
-controls.maxDistance = 20000;
 
-const ambientLight = new THREE.AmbientLight(0x404040, 2); 
+const ambientLight = new THREE.AmbientLight(0x404040, 2);
 scene.add(ambientLight);
-
 const hemiLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1.5);
 scene.add(hemiLight);
-
 const sunLight = new THREE.DirectionalLight(0xffffff, 2);
 sunLight.position.set(100, 50, 100);
 scene.add(sunLight);
-
-const earthGroup = new THREE.Group();
-scene.add(earthGroup);
 
 const textureLoader = new THREE.TextureLoader();
 const loader = new GLTFLoader();
@@ -39,65 +32,99 @@ dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/dr
 loader.setDRACOLoader(dracoLoader);
 
 let earthMesh;
-
-document.getElementById('loading').style.display = 'block';
+const earthGroup = new THREE.Group();
+scene.add(earthGroup);
 
 textureLoader.load(window.APP_CONFIG.earthTextureUrl, (texture) => {
     document.getElementById('loading').style.display = 'none';
     const geometry = new THREE.SphereGeometry(50, 64, 64);
-    const material = new THREE.MeshPhongMaterial({
-        map: texture,
-        specular: new THREE.Color(0x333333),
-        shininess: 5
-    });
+    const material = new THREE.MeshPhongMaterial({ map: texture, specular: 0x333333, shininess: 5 });
     earthMesh = new THREE.Mesh(geometry, material);
     earthGroup.add(earthMesh);
-}, undefined, (err) => {
-    console.error("Error loading texture", err);
-    document.getElementById('loading').innerText = "Error loading texture.";
 });
 
 function createStarfield() {
     const starGeo = new THREE.BufferGeometry();
     const starCount = 5000;
     const positions = new Float32Array(starCount * 3);
-
     for (let i = 0; i < starCount; i++) {
-        const r = 1000 + Math.random() * 2000; // Far away
+        const r = 1000 + Math.random() * 2000;
         const theta = 2 * Math.PI * Math.random();
         const phi = Math.acos(2 * Math.random() - 1);
-
-        const x = r * Math.sin(phi) * Math.cos(theta);
-        const y = r * Math.sin(phi) * Math.sin(theta);
-        const z = r * Math.cos(phi);
-
-        positions[i * 3] = x;
-        positions[i * 3 + 1] = y;
-        positions[i * 3 + 2] = z;
+        positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        positions[i * 3 + 2] = r * Math.cos(phi);
     }
-
     starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const starMat = new THREE.PointsMaterial({
-        color: 0xffffff,
-        size: 1.5,
-        transparent: true,
-        opacity: 0.8
-    });
-    const stars = new THREE.Points(starGeo, starMat);
-    scene.add(stars);
+    scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.5, transparent: true, opacity: 0.8 })));
 }
 createStarfield();
 
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+const satelliteMeshes = [];
+const assetsBase = window.APP_CONFIG.assetsBaseUrl;
+
+fetch(window.APP_CONFIG.satellitesDataUrl)
+    .then(response => response.json())
+    .then(data => {
+        data.forEach(sat => createSatellite(sat));
+    })
+    .catch(err => console.error("Error loading data", err));
+
+function createSatellite(data) {
+    const geometry = new THREE.SphereGeometry(1.0, 8, 8);
+    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const mesh = new THREE.Mesh(geometry, material);
+
+    mesh.position.set(Math.random() * 100, Math.random() * 100, Math.random() * 100);
+    mesh.userData = { ...data };
+
+    scene.add(mesh);
+    satelliteMeshes.push(mesh);
 }
-window.addEventListener('resize', onWindowResize, false);
+
+function zoomIn() {
+    const direction = new THREE.Vector3().copy(camera.position).sub(controls.target).normalize();
+    const distance = camera.position.distanceTo(controls.target);
+    const newDistance = Math.max(controls.minDistance, distance - 20);
+    camera.position.copy(controls.target).add(direction.multiplyScalar(newDistance));
+}
+function zoomOut() {
+    const direction = new THREE.Vector3().copy(camera.position).sub(controls.target).normalize();
+    const distance = camera.position.distanceTo(controls.target);
+    const newDistance = Math.min(controls.maxDistance, distance + 20);
+    camera.position.copy(controls.target).add(direction.multiplyScalar(newDistance));
+}
+document.getElementById('zoom-in').addEventListener('click', zoomIn);
+document.getElementById('zoom-out').addEventListener('click', zoomOut);
+
+let timeScaleFactor = 0.1;
+document.getElementById('speed-slider').addEventListener('input', (e) => {
+    timeScaleFactor = parseFloat(e.target.value);
+});
+
+let isPaused = false;
+document.getElementById('play-pause-btn').addEventListener('click', () => {
+    isPaused = !isPaused;
+    document.getElementById('play-pause-btn').innerText = isPaused ? "Play" : "Pause";
+});
+
+const clock = new THREE.Clock(); 
 
 function animate() {
     requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+
+    if (!isPaused && earthMesh) {
+        earthMesh.rotation.y += 0.05 * delta * timeScaleFactor;
+    }
+
     controls.update();
     renderer.render(scene, camera);
 }
 animate();
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
