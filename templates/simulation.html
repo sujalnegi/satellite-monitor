@@ -1,4 +1,3 @@
-<!-- recommiting coz i couldnt write the description in commit 5 -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -21,6 +20,22 @@
 <body>
     <div id="loading">Loading Simulation...</div>
     <div id="tooltip"></div>
+    <canvas id="continent-canvas" width="2048" height="1024" style="display: none;"></canvas>
+    <img id="continent-img" src="{{ url_for('static', filename='assets/continent_map.png') }}" style="display: none;"
+        crossorigin="anonymous">
+
+    <div id="satellite-selector-container"
+        style="position: absolute; top: 20px; left: 20px; background: rgba(20, 20, 30, 0.9); padding: 10px 15px; border-radius: 8px; border: 1px solid #444; z-index: 1000; backdrop-filter: blur(5px); color: white;">
+        <label for="satellite-select" style="margin-right: 10px; font-weight: bold; color: #4facfe;">Select
+            Satellite:</label>
+        <select id="satellite-select"
+            style="background: rgba(0,0,0,0.5); color: white; border: 1px solid #666; padding: 5px; border-radius: 4px; cursor: pointer;">
+            <option value="">-- None --</option>
+        </select>
+        <button id="reset-view-btn"
+            style="display: none; margin-left: 10px; background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Back
+            to Normal</button>
+    </div>
 
     <div id="zoom-controls">
         <button id="zoom-in">+</button>
@@ -31,13 +46,42 @@
         style="position: fixed; bottom: 20px; left: 20px; background: rgba(20, 20, 30, 0.9); padding: 20px; border-radius: 10px; border: 1px solid #444; color: white; z-index: 1000; backdrop-filter: blur(5px); display: flex; flex-direction: column; gap: 15px; width: 220px;">
 
         <button id="play-pause-btn"
-            style="width: 100%; cursor: pointer; padding: 8px; background: #4facfe; border: none; color: white; border-radius: 5px; font-weight: bold;">Pause</button>
+            style="width: 100%; cursor: pointer; padding: 8px; background: #4facfe; border: none; color: white; border-radius: 5px; font-weight: bold; transition: background 0.2s;">Pause</button>
 
         <div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <label style="color: #4facfe; font-size: 14px;">Sim Speed</label>
+                <label for="speed-slider" style="color: #4facfe; font-size: 14px;">Sim Speed</label>
+                <span id="speed-value" style="font-family: monospace; font-size: 14px;">0.10x</span>
             </div>
-            <input type="range" id="speed-slider" min="0.01" max="10.0" step="0.01" value="0.1" style="width: 100%;">
+            <input type="range" id="speed-slider" min="0.01" max="10.0" step="0.01" value="0.1"
+                style="width: 100%; cursor: pointer;">
+        </div>
+
+        <div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <label for="scale-slider" style="color: #4facfe; font-size: 14px;">Sat Scale</label>
+                <span id="scale-value" style="font-family: monospace; font-size: 14px;">0.010</span>
+            </div>
+            <input type="range" id="scale-slider" min="0.001" max="2.0" step="0.001" value="0.01"
+                style="width: 100%; cursor: pointer;">
+        </div>
+    </div>
+
+    <div id="info-panel">
+        <h2 id="sat-name">Satellite Name</h2>
+        <div class="data-row"><span class="data-label">Agency:</span><span class="data-value" id="sat-agency">-</span>
+        </div>
+        <div class="data-row"><span class="data-label">Launch Site:</span><span class="data-value"
+                id="sat-launch">-</span></div>
+        <div class="data-row"><span class="data-label">Altitude:</span><span class="data-value" id="sat-radius">-</span>
+        </div>
+        <div class="data-row"><span class="data-label">Inclination:</span><span class="data-value"
+                id="sat-inclination">-</span></div>
+        <div class="data-row"><span class="data-label">Period:</span><span class="data-value" id="sat-period">-</span>
+        </div>
+        <div class="data-row"><span class="data-label">Speed:</span><span class="data-value" id="sat-speed">-</span>
+        </div>
+        <div style="margin-top: 15px; font-size: 12px; color: #888; text-align: center;">Click anywhere else to unlock
         </div>
     </div>
 
