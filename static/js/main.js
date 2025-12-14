@@ -5,6 +5,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
 const scene = new THREE.Scene();
 window.scene = scene;
+
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50000);
 camera.position.set(150, 50, 150);
 
@@ -16,6 +17,8 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
+controls.minDistance = 60;
+controls.maxDistance = 20000;
 
 const ambientLight = new THREE.AmbientLight(0x404040, 2);
 scene.add(ambientLight);
@@ -31,12 +34,15 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
 loader.setDRACOLoader(dracoLoader);
 
-let earthMesh;
 const earthGroup = new THREE.Group();
 scene.add(earthGroup);
+let earthMesh;
+
+const loadingEl = document.getElementById('loading');
+if (loadingEl) loadingEl.style.display = 'block';
 
 textureLoader.load(window.APP_CONFIG.earthTextureUrl, (texture) => {
-    document.getElementById('loading').style.display = 'none';
+    if (loadingEl) loadingEl.style.display = 'none';
     const geometry = new THREE.SphereGeometry(50, 64, 64);
     const material = new THREE.MeshPhongMaterial({ map: texture, specular: 0x333333, shininess: 5 });
     earthMesh = new THREE.Mesh(geometry, material);
@@ -67,12 +73,11 @@ fetch(window.APP_CONFIG.satellitesDataUrl)
     .then(response => response.json())
     .then(data => {
         data.forEach(sat => createSatellite(sat));
-    })
-    .catch(err => console.error("Error loading data", err));
+    });
 
 function createSatellite(data) {
     const geometry = new THREE.SphereGeometry(1.0, 8, 8);
-    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const material = new THREE.MeshBasicMaterial({ color: 0x4facfe });
     const mesh = new THREE.Mesh(geometry, material);
 
     mesh.position.set(Math.random() * 100, Math.random() * 100, Math.random() * 100);
@@ -82,40 +87,65 @@ function createSatellite(data) {
     satelliteMeshes.push(mesh);
 }
 
-function zoomIn() {
-    const direction = new THREE.Vector3().copy(camera.position).sub(controls.target).normalize();
-    const distance = camera.position.distanceTo(controls.target);
-    const newDistance = Math.max(controls.minDistance, distance - 20);
-    camera.position.copy(controls.target).add(direction.multiplyScalar(newDistance));
-}
-function zoomOut() {
-    const direction = new THREE.Vector3().copy(camera.position).sub(controls.target).normalize();
-    const distance = camera.position.distanceTo(controls.target);
-    const newDistance = Math.min(controls.maxDistance, distance + 20);
-    camera.position.copy(controls.target).add(direction.multiplyScalar(newDistance));
-}
-document.getElementById('zoom-in').addEventListener('click', zoomIn);
-document.getElementById('zoom-out').addEventListener('click', zoomOut);
-
 let timeScaleFactor = 0.1;
-document.getElementById('speed-slider').addEventListener('input', (e) => {
-    timeScaleFactor = parseFloat(e.target.value);
-});
-
 let isPaused = false;
-document.getElementById('play-pause-btn').addEventListener('click', () => {
-    isPaused = !isPaused;
-    document.getElementById('play-pause-btn').innerText = isPaused ? "Play" : "Pause";
-});
+const clock = new THREE.Clock();
 
-const clock = new THREE.Clock(); 
+const playPauseBtn = document.getElementById('play-pause-btn');
+const speedSlider = document.getElementById('speed-slider');
+const zoomInBtn = document.getElementById('zoom-in');
+const zoomOutBtn = document.getElementById('zoom-out');
+
+if (playPauseBtn) {
+    playPauseBtn.addEventListener('click', () => {
+        isPaused = !isPaused;
+        playPauseBtn.innerText = isPaused ? "Play" : "Pause";
+        playPauseBtn.style.background = isPaused ? "#28a745" : "#4facfe";
+    });
+}
+
+if (speedSlider) {
+    speedSlider.addEventListener('input', (e) => {
+        timeScaleFactor = parseFloat(e.target.value);
+    });
+}
+
+if (zoomInBtn) {
+    zoomInBtn.addEventListener('click', () => {
+        const direction = new THREE.Vector3().copy(camera.position).sub(controls.target).normalize();
+        const distance = camera.position.distanceTo(controls.target);
+        const newDistance = Math.max(controls.minDistance, distance - 20);
+        camera.position.copy(controls.target).add(direction.multiplyScalar(newDistance));
+        controls.update();
+    });
+}
+if (zoomOutBtn) {
+    zoomOutBtn.addEventListener('click', () => {
+        const direction = new THREE.Vector3().copy(camera.position).sub(controls.target).normalize();
+        const distance = camera.position.distanceTo(controls.target);
+        const newDistance = Math.min(controls.maxDistance, distance + 20);
+        camera.position.copy(controls.target).add(direction.multiplyScalar(newDistance));
+        controls.update();
+    });
+}
 
 function animate() {
     requestAnimationFrame(animate);
+
     const delta = clock.getDelta();
 
     if (!isPaused && earthMesh) {
         earthMesh.rotation.y += 0.05 * delta * timeScaleFactor;
+    }
+
+    if (!isPaused) {
+        satelliteMeshes.forEach(mesh => {
+            const speed = 0.1 * delta * timeScaleFactor;
+            const x = mesh.position.x * Math.cos(speed) - mesh.position.z * Math.sin(speed);
+            const z = mesh.position.x * Math.sin(speed) + mesh.position.z * Math.cos(speed);
+            mesh.position.x = x;
+            mesh.position.z = z;
+        });
     }
 
     controls.update();
