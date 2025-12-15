@@ -21,6 +21,7 @@
             overflow: hidden;
             position: relative;
         }
+
         .stars {
             position: absolute;
             top: 0;
@@ -37,25 +38,30 @@
             animation: moveStars 100s linear infinite;
             z-index: 0;
         }
+
         @keyframes moveStars {
             from {
                 background-position: 0 0;
             }
+
             to {
                 background-position: 1000px 500px;
             }
         }
+
         .container {
             text-align: center;
             z-index: 10;
             position: relative;
             backdrop-filter: blur(2px);
-            padding: 40px;
+            padding: 20px;
+            max-width: 400px;
             border-radius: 20px;
             background: rgba(255, 255, 255, 0.05);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
         }
+
         h1 {
             position: absolute;
             top: 15%;
@@ -74,6 +80,7 @@
             text-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
             z-index: 20;
         }
+
         p {
             font-size: 1.2rem;
             color: #ccc;
@@ -100,74 +107,121 @@
         }
 
         .rocket-svg {
-            width: 80px;
-            height: 140px;
+            width: 50px;
+            height: 90px;
             filter: drop-shadow(0 0 10px rgba(79, 172, 254, 0.5));
             transition: filter 0.3s;
         }
+
         .rocket-container:hover .rocket-svg {
             filter: drop-shadow(0 0 20px rgba(0, 242, 254, 0.8));
         }
+
         .rocket-label {
             display: block;
-            margin-top: 15px;
+            margin-top: 10px;
             font-family: 'Press Start 2P', cursive;
-            font-size: 1rem;
+            font-size: 1.0rem;
+            font-weight: bold;
             color: white;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
+
         .launching .rocket-svg {
             animation: shake 0.5s ease-in-out infinite, flyUp 1.5s ease-in 0.5s forwards;
         }
+
         .launching .exhaust {
             opacity: 1;
             animation: thrust 0.2s ease-in-out infinite;
         }
+
         .exhaust {
             opacity: 0;
             fill: #ffce00;
             transition: opacity 0.3s;
         }
+
         @keyframes shake {
+
             0%,
             100% {
                 transform: translateX(0);
             }
+
             25% {
                 transform: translateX(-2px);
             }
+
             75% {
                 transform: translateX(2px);
             }
         }
+
         @keyframes flyUp {
             0% {
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
+
             100% {
-                transform: translateY(-100vh);
+                transform: translateY(-100vh) scale(3);
             }
         }
+
         @keyframes thrust {
+
             0%,
             100% {
                 transform: scaleY(1);
             }
+
             50% {
                 transform: scaleY(1.5);
             }
         }
+
+        .title-satellite {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: transparent;
+            z-index: 25;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .char-span {
+            display: inline-block;
+            transition: all 0.1s;
+        }
+
+        .char-highlight {
+            -webkit-text-fill-color: #fff !important;
+            text-shadow: 0 0 20px #fff, 0 0 40px #00f2fe !important;
+            transform: scale(1.2);
+        }
     </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
 </head>
 
 <body>
     <div class="stars"></div>
-    <h1>Where is this Satellite?</h1>
+    <h1 id="main-title">Where is this Satellite?</h1>
+    <div id="title-sat" class="title-satellite"></div>
     <div class="container">
         <p>Explore real-time positions of Earth's satellites, tracking the ISS, Hubble, and more in an immersive 3D
             simulation.</p>
 
-            <!-- rocket -->
         <div class="rocket-container" onclick="launchRocket()">
             <svg class="rocket-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
                 <path fill="#4facfe" d="M144 288v64c0 35.3 28.7 64 64 64v-64c0-17.7-14.3-32-32-32s-32-14.3-32-32z" />
@@ -186,22 +240,109 @@
             </svg>
             <span class="rocket-label">LAUNCH</span>
         </div>
+
+        <div class="loading-container">
+            <div class="loading-bar-bg">
+                <div class="loading-bar-fill" id="progress-fill"></div>
+            </div>
+        </div>
     </div>
 
-    <script>
-        function launchRocket() {
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        const sat = document.getElementById('title-sat');
+        const title = document.getElementById('main-title');
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.z = 2.5; 
+
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(120, 120); 
+        renderer.setPixelRatio(window.devicePixelRatio);
+        sat.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0x00f2fe, 3);
+        dirLight.position.set(5, 5, 5);
+        scene.add(dirLight);
+
+        let ufoMesh;
+        const loader = new GLTFLoader();
+        loader.load("{{ url_for('static', filename='assets/ufo.glb') }}", (gltf) => {
+            ufoMesh = gltf.scene;
+            const box = new THREE.Box3().setFromObject(ufoMesh);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 1.5 / maxDim; 
+            ufoMesh.scale.set(scale, scale, scale);
+            
+            ufoMesh.rotation.x = 0.5;
+
+            scene.add(ufoMesh);
+        });
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            if (ufoMesh) {
+                ufoMesh.rotation.y += 0.05; 
+                ufoMesh.rotation.z = Math.sin(Date.now() * 0.002) * 0.2;
+            }
+            renderer.render(scene, camera);
+        }
+        animate3D();
+
+        let angle = 0;
+
+        function animateSatellitePosition() {
+            if (!title) return;
+            const titleRect = title.getBoundingClientRect();
+            const baseRx = titleRect.width / 2;
+            const baseRy = titleRect.height / 2;
+            const centerX = titleRect.left + titleRect.width / 2;
+            const centerY = titleRect.top + titleRect.height / 2;
+
+            angle += 0.008;
+
+            const wobbleX = Math.sin(angle * 2.5) * 5;
+            const wobbleY = Math.cos(angle * 3.2) * 2;
+            const rX = baseRx + Math.sin(angle * 1.5) * 5;
+            const rY = baseRy + Math.cos(angle * 1.9) * 2;
+
+            const x = centerX + Math.cos(angle) * rX + wobbleX;
+            const y = centerY + Math.sin(angle) * rY + wobbleY;
+
+            sat.style.left = `${x}px`;
+            sat.style.top = `${y}px`;
+
+            requestAnimationFrame(animateSatellitePosition);
+        }
+
+        animateSatellitePosition();
+
+        window.launchRocket = function() {
             const container = document.querySelector('.rocket-container');
+            const loadingContainer = document.querySelector('.loading-container');
+            const progress = document.getElementById('progress-fill');
+
             if (container.classList.contains('launching')) return;
 
             container.classList.add('launching');
+            loadingContainer.style.display = 'block';
+
+            setTimeout(() => {
+                progress.style.width = '100%';
+            }, 50);
 
             setTimeout(() => {
                 window.location.href = "{{ url_for('simulation') }}";
-            }, 1500);
+            }, 2000);
         }
     </script>
 </body>
 
 </html>
-
-
