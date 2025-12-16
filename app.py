@@ -10,6 +10,10 @@ def home():
 def simulation():
     return render_template('simulation.html')
 
+@app.route('/instructions')
+def instructions():
+    return render_template('instructions.html')
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404

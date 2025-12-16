@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Protocol - Instructions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            color: #00f2fe;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+                radial-gradient(1px 1px at 90px 40px, #fff, rgba(0, 0, 0, 0));
+            background-size: 200px 200px;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .interface-container {
+            width: 90%;
+            max-width: 1000px;
+            background: rgba(0, 20, 40, 0.85);
+            border: 1px solid #4facfe;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.2), inset 0 0 50px rgba(0, 242, 254, 0.1);
+            border-radius: 10px;
+            padding: 40px;
+            position: relative;
+            backdrop-filter: blur(5px);
+            margin: 40px 0;
+        }
+
+        
+        .interface-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 242, 254, 0.02) 51%, transparent 51%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 0 10px #4facfe, 0 0 20px #4facfe;
+            margin-bottom: 40px;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #4facfe;
+            padding-bottom: 20px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: rgba(0, 242, 254, 0.05);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            padding: 20px;
+            border-radius: 5px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+            border-color: #fff;
+        }
+
+        .card h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: #ffce00;
+            margin-top: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2::before {
+            content: '>';
+            color: #4facfe;
+        }
+
+        .card p,
+        .card li {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #ddd;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .key {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.9em;
+            color: #fff;
+            box-shadow: 0 2px 0 #666;
+            font-family: sans-serif;
+            font-weight: bold;
+        }
+
+        .action-btn {
+            display: block;
+            width: 200px;
+            margin: 40px auto 0;
+            padding: 15px 0;
+            text-align: center;
+            background: transparent;
+            border: 2px solid #4facfe;
+            color: #4facfe;
+            font-family: 'Press Start 2P', cursive;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: 0.3s;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .action-btn:hover {
+            background: #4facfe;
+            color: #000;
+            box-shadow: 0 0 20px #4facfe;
+        }
+
+        .icon-display {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #4facfe;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stars"></div>
+    <div class="interface-container">
+        <h1> MISSION MANUAL</h1>
+
+        <div class="grid-layout">
+            <div class="card">
+                <h2>FLIGHT CONTROLS</h2>
+                <div class="icon-display">🎮</div>
+                <ul>
+                    <li><strong>Left Click + Drag:</strong> Rotate Camera around target.</li>
+                    <li><strong>Right Click + Drag:</strong> Pan camera view.</li>
+                    <li><strong>Scroll:</strong> Zoom In / Out.</li>
+                    <li><strong>Spacebar:</strong> Pause / Resume Simulation time.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>TARGETING</h2>
+                <div class="icon-display">🎯</div>
+                <p>
+                    Identify satellites by <strong>clicking</strong> on them directly in space, or use the
+                    <strong>Dropdown Menu</strong> (top-right) to scan for a specific target.
+                </p>
+                <p>
+                    <span style="color: #ffce00;">LOCKED MODE:</span> The camera will auto-follow the target. Press
+                    <span class="key">X</span> or click "Reset View" to disengage.
+                </p>
+            </div>
+
+            <div class="card">
+                <h2>ENVIRON & TIME</h2>
+                <div class="icon-display">🌍</div>
+                <ul>
+                    <li><strong>Earth Scan:</strong> Hover over continents to identify sectors.</li>
+                    <li><strong>Time Warp:</strong> Use the speed slider to accelerate orbital mechanics up to 1000x
+                        real-time.</li>
+                    <li><strong>Scale:</strong> Increase satellite size for better visibility.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>MANUAL OVERRIDE</h2>
+                <div class="icon-display">⌨️</div>
+                <p>Use keyboard arrows for precision camera adjustment.</p>
+                <ul>
+                    <li><span class="key">←</span> <span class="key">→</span> : Rotate Orbit</li>
+                    <li><span class="key">↑</span> <span class="key">↓</span> : Polar Tilt</li>
+                </ul>
+            </div>
+        </div>
+
+        <a href="{{ url_for('home') }}" class="action-btn">BACK TO BASE</a>
+    </div>
+</body>
+
+</html>

@@ -203,6 +203,28 @@
             text-shadow: 0 0 20px #fff, 0 0 40px #00f2fe !important;
             transform: scale(1.2);
         }
+        .instruction-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 12px 20px;
+            border: 1px solid rgba(79, 172, 254, 0.5);
+            color: rgba(79, 172, 254, 0.8);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            background: transparent;
+            border-radius: 5px;
+            width: fit-content;
+        }
+
+        .instruction-btn:hover {
+            border-color: #4facfe;
+            color: #fff;
+            text-shadow: 0 0 10px #4facfe;
+            background: rgba(79, 172, 254, 0.1);
+            transform: translateY(-2px);
+        }
     </style>
     <script type="importmap">
         {
@@ -239,6 +261,8 @@
             </svg>
             <span class="rocket-label">LAUNCH</span>
         </div>
+
+        <a href="{{ url_for('instructions') }}" class="instruction-btn">MISSION MANUAL</a>
 
         <div class="loading-container">
             <div class="loading-bar-bg">
