@@ -201,7 +201,56 @@ satelliteSelect.addEventListener('change', (e) => {
 
 
 
+
+function getOrbitPoints(data, startTime) {
+    if (!data.satrec) return [];
+
+    const points = [];
+    const duration = 100; // minutes (approx 1 orbit)
+    const step = 1.0;
+
+    for (let i = 0; i <= duration; i += step) {
+        const t = new Date(startTime.getTime() + i * 60000);
+        const pv = satellite.propagate(data.satrec, t);
+
+        if (pv.position && !isNaN(pv.position.x)) {
+            const scale = SCENE_EARTH_RADIUS / EARTH_RADIUS_KM;
+            const x = pv.position.x * scale;
+            const y = pv.position.z * scale;
+            const z = -pv.position.y * scale;
+            points.push(new THREE.Vector3(x, y, z));
+        }
+    }
+    return points;
+}
+
+function updateOrbitPath(data, time) {
+    if (!data.orbitLine || !data.satrec) return;
+    const points = getOrbitPoints(data, time);
+    data.orbitLine.geometry.setFromPoints(points);
+    data.lastOrbitUpdate = new Date(time.getTime());
+}
+
+function createOrbitPath(data) {
+    if (!data.tle1 || !data.tle2) return;
+
+    if (!data.satrec) {
+        data.satrec = satellite.twoline2satrec(data.tle1, data.tle2);
+    }
+
+    const points = getOrbitPoints(data, new Date());
+    const geo = new THREE.BufferGeometry().setFromPoints(points);
+    const mat = new THREE.LineBasicMaterial({ color: 0xeeeeee, opacity: 0.3, transparent: true });
+    const line = new THREE.Line(geo, mat);
+
+    data.orbitLine = line;
+    data.lastOrbitUpdate = new Date();
+
+    scene.add(line);
+}
+
 function createSatellite(data, index) {
+    createOrbitPath(data);
     const modelFile = data.modelFileName || 'satellite.glb';
     const modelUrl = assetsBase + modelFile;
 
@@ -347,6 +396,12 @@ function updateSatellites(delta) {
 
     const now = window.simTime;
 
+    if (earthMesh) {
+        // Sync Earth rotation to actual Greenwich Sidereal Time
+        const gmst = satellite.gstime(now);
+        earthMesh.rotation.y = gmst;
+    }
+
 
 
 
@@ -422,6 +477,13 @@ function updateSatellites(delta) {
             vector.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclinationRad);
 
             mesh.position.copy(vector);
+        }
+
+        if (data.orbitLine && data.satrec) {
+            const timeDiff = Math.abs(now.getTime() - data.lastOrbitUpdate.getTime());
+            if (timeDiff > 90 * 60 * 1000) {
+                updateOrbitPath(data, now);
+            }
         }
     });
 }
