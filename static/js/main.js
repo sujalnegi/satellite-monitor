@@ -26,8 +26,10 @@ const hemiLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1.5);
 scene.add(hemiLight);
 
 const sunLight = new THREE.DirectionalLight(0xffffff, 2);
-sunLight.position.set(100, 50, 100);
+sunLight.position.set(10000, 0, 0);
 scene.add(sunLight);
+
+
 
 const earthGroup = new THREE.Group();
 scene.add(earthGroup);
@@ -39,36 +41,37 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
 loader.setDRACOLoader(dracoLoader);
 
+loader.load(window.APP_CONFIG.assetsBaseUrl + 'sun.glb', (gltf) => {
+    const sun = gltf.scene;
+    sun.position.set(10000, 0, 0);
+    sun.scale.set(50, 50, 50);
+    scene.add(sun);
+});
+
 const assetsBase = window.APP_CONFIG.assetsBaseUrl;
 
 let earthMesh;
 
-textureLoader.load(window.APP_CONFIG.earthTextureUrl, (texture) => {
+loader.load(window.APP_CONFIG.assetsBaseUrl + 'earth.glb', (gltf) => {
     document.getElementById('loading').style.display = 'none';
-    const geometry = new THREE.SphereGeometry(50, 64, 64);
-    const material = new THREE.MeshPhongMaterial({
-        map: texture,
-        specular: new THREE.Color(0x333333),
-        shininess: 5
-    });
-    earthMesh = new THREE.Mesh(geometry, material);
-    earthGroup.add(earthMesh);
+    const model = gltf.scene;
+    earthMesh = model;
 
-    const continentImg = document.getElementById('continent-img');
-    const continentCanvas = document.getElementById('continent-canvas');
-    const ctx = continentCanvas.getContext('2d', { willReadFrequently: true });
+    const box = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const targetDiameter = 100;
 
-    if (continentImg.complete) {
-        ctx.drawImage(continentImg, 0, 0, 2048, 1024);
-    } else {
-        continentImg.onload = () => {
-            ctx.drawImage(continentImg, 0, 0, 2048, 1024);
-        };
+    if (maxDim > 0) {
+        const scale = targetDiameter / maxDim;
+        model.scale.set(scale, scale, scale);
     }
 
+    earthGroup.add(model);
 }, undefined, (err) => {
-    console.error("Error loading texture", err);
-    document.getElementById('loading').innerText = "Error loading texture. Check console.";
+    console.error("Error loading earth model", err);
+    document.getElementById('loading').innerText = "Error loading earth. Check console.";
 });
 
 
@@ -106,16 +109,7 @@ function createStarfield() {
 }
 createStarfield();
 
-const cloudGeo = new THREE.SphereGeometry(50.5, 64, 64);
-const cloudMat = new THREE.MeshPhongMaterial({
-    map: textureLoader.load(window.APP_CONFIG.cloudsTextureUrl),
-    transparent: true,
-    opacity: 0.9,
-    blending: THREE.AdditiveBlending,
-    side: THREE.DoubleSide
-});
-const clouds = new THREE.Mesh(cloudGeo, cloudMat);
-scene.add(clouds);
+
 
 let moonMesh;
 const MOON_DISTANCE = 250;
@@ -170,8 +164,7 @@ const infoPanel = document.getElementById('info-panel');
 let lockedSatellite = null;
 let selectionBox = null;
 let lastLockedSatPos = null;
-let viewMode = 'ORBIT'; // 'ORBIT' or 'HORIZON'
-
+let viewMode = 'ORBIT';
 
 
 const satelliteSelect = document.getElementById('satellite-select');
@@ -348,25 +341,19 @@ window.addEventListener('keyup', (e) => {
 
 function updateSatellites(delta) {
     if (!window.simTime) window.simTime = new Date();
-
-    // Only advance time if not paused
     if (!isPaused) {
         window.simTime = new Date(window.simTime.getTime() + delta * 1000 * REAL_SEC_TO_SIM_SEC * timeScaleFactor);
     }
 
     const now = window.simTime;
 
-    if (earthMesh && !isPaused) {
-        const earthRotationSpeed = (2 * Math.PI) / 86400;
-        earthMesh.rotation.y += earthRotationSpeed * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
-    }
 
-    if (clouds && !isPaused) {
-        clouds.rotation.y += ((2 * Math.PI) / 86400) * 1.5 * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
-    }
+
+
 
     if (moonMesh) {
         const moonPeriod = 2332800;
+
         const moonSpeed = (2 * Math.PI) / moonPeriod;
 
         if (!isPaused) {
@@ -469,38 +456,30 @@ function checkIntersection(isClick = false) {
     const intersects = raycaster.intersectObjects(objectsToCheck, true);
 
     if (intersects.length > 0) {
-        const intersection = intersects[0];
-        const object = intersection.object;
+        const object = intersects[0].object;
+        let target = object;
 
-        if (object === earthMesh) {
+        // Traverse up
+        while (target) {
+            if (target === earthMesh) break;
+            if (target.userData && target.userData.isSatelliteRoot) break;
+            target = target.parent;
+        }
+
+        if (target === earthMesh) {
             document.body.style.cursor = 'default';
-
             if (!isClick) {
-                const uv = intersection.uv;
-                const continent = getContinentAtUV(uv);
-                if (continent) {
-                    showTooltip(event.clientX, event.clientY, continent);
-                } else {
-                    tooltip.style.display = 'none';
-                }
-            } else {
-                if (lockedSatellite) {
-                    unlockSatellite();
-                }
+                const tooltip = document.getElementById('tooltip');
+                if (tooltip) tooltip.style.display = 'none';
             }
-        } else {
-            let target = object;
-            while (target && !target.userData.isSatelliteRoot && target.parent) {
-                target = target.parent;
-            }
+            return;
+        }
 
-            if (target && !target.userData.isSatelliteRoot) {
-                target = object;
-            }
-
+        if (target && target.userData.isSatelliteRoot) {
             const data = target.userData;
             document.body.style.cursor = 'pointer';
-            tooltip.style.display = 'none';
+            const tooltip = document.getElementById('tooltip');
+            if (tooltip) tooltip.style.display = 'none';
 
             if (isClick) {
                 if (lockedSatellite !== target) {
@@ -514,7 +493,8 @@ function checkIntersection(isClick = false) {
         }
     } else {
         document.body.style.cursor = 'default';
-        tooltip.style.display = 'none';
+        const tooltip = document.getElementById('tooltip');
+        if (tooltip) tooltip.style.display = 'none';
 
         if (!lockedSatellite) {
             infoPanel.style.display = 'none';
@@ -570,43 +550,7 @@ window.addEventListener('mousemove', onMouseMove, false);
 window.addEventListener('click', onClick, false);
 window.addEventListener('resize', onWindowResize, false);
 
-function getContinentAtUV(uv) {
-    const canvas = document.getElementById('continent-canvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    const x = Math.floor(uv.x * canvas.width);
-    const y = Math.floor((1 - uv.y) * canvas.height);
-
-    const pixel = ctx.getImageData(x, y, 1, 1).data;
-    const r = pixel[0];
-    const g = pixel[1];
-    const b = pixel[2];
-
-    const THRESHOLD_HIGH = 150;
-    const THRESHOLD_LOW = 100;
-
-    const isRed = r > THRESHOLD_HIGH;
-    const isGreen = g > THRESHOLD_HIGH;
-    const isBlue = b > THRESHOLD_HIGH;
-
-    if (isRed && isGreen && isBlue) return "Antarctica";
-    if (isRed && isGreen && !isBlue) return "Africa";
-    if (isRed && !isGreen && isBlue) return "Asia";
-    if (!isRed && isGreen && isBlue) return "Oceania";
-    if (isRed && !isGreen && !isBlue) return "North America";
-    if (!isRed && isGreen && !isBlue) return "South America";
-    if (!isRed && !isGreen && isBlue) return "Europe";
-
-    return null;
-}
-
-function showTooltip(x, y, text) {
-    const tooltip = document.getElementById('tooltip');
-    tooltip.style.left = x + 15 + 'px';
-    tooltip.style.top = y + 15 + 'px';
-    tooltip.innerText = text;
-    tooltip.style.display = 'block';
-}
 
 function animate() {
     requestAnimationFrame(animate);
@@ -662,13 +606,8 @@ function animate() {
         lastLockedSatPos.copy(currentSatPos);
 
         if (viewMode === 'ORBIT') {
-            // Keep Soft Lock rotation from above
         } else {
-            // Horizon mode also uses Soft Lock now (via quaternion above)
-            // just initial placement differs
         }
-
-        // Always lock target to satellite
         controls.target.copy(lockedSatellite.position);
 
         const msg = document.getElementById('sat-message');
@@ -720,29 +659,19 @@ function lockOnSatellite(mesh, forceUpdate = false) {
         const offset = satPos.clone().normalize().multiplyScalar(targetDist);
 
         if (viewMode === 'HORIZON') {
-            // Close-up Tilted View
-            // Base distance on scale
             const s = mesh.scale.x || 1.0;
-            const closeDist = s * 50.0; // Adjustable zoom factor
-
-            // Radial vector
+            const closeDist = s * 50.0;
             const radial = satPos.clone().normalize();
-
-            // Tangent vector for tilt axis (approx East)
             const up = new THREE.Vector3(0, 1, 0);
             let tangent = new THREE.Vector3().crossVectors(up, radial).normalize();
-            if (tangent.lengthSq() < 0.1) tangent.set(1, 0, 0); // Handle pole case
-
-            // Tilt vector: Rotate Radial by 30 deg around Tangent
+            if (tangent.lengthSq() < 0.1) tangent.set(1, 0, 0);
             const tiltVec = radial.clone().applyAxisAngle(tangent, Math.PI / 6);
 
-            // Position = SatPos + TiltVec * Dist
             const viewPos = satPos.clone().add(tiltVec.multiplyScalar(closeDist));
 
             camera.position.copy(viewPos);
             controls.target.copy(mesh.position);
         } else {
-            // ORBIT Mode (Standard Fly-To)
             camera.position.copy(offset);
             controls.target.copy(mesh.position);
         }
@@ -791,6 +720,7 @@ function getSatelliteMessage(name) {
     if (n.includes('starlink')) return "Providing internet from above!";
     if (n.includes('james webb')) return "Unfolding the cosmos history.";
     if (n.includes('telescope')) return "Watching the stars.";
+    if (n.includes('goes')) return "Tracking storms and weather!";
 
     return "Hey!! I am here";
 }
@@ -809,7 +739,7 @@ function unlockSatellite() {
         document.getElementById('switch-view-btn').style.display = 'none';
         document.getElementById('sat-message').style.display = 'none';
 
-        viewMode = 'ORBIT'; // Reset mode
+        viewMode = 'ORBIT';
 
         controls.target.set(0, 0, 0);
         camera.position.set(150, 50, 150);
@@ -825,6 +755,5 @@ document.getElementById('switch-view-btn').addEventListener('click', () => {
     if (!lockedSatellite) return;
     viewMode = (viewMode === 'ORBIT') ? 'HORIZON' : 'ORBIT';
 
-    // Re-trigger lock logic to snap camera immediately
     lockOnSatellite(lockedSatellite, true);
-});
+}); 
