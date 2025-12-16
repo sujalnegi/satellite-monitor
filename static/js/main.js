@@ -19,7 +19,7 @@ controls.dampingFactor = 0.05;
 controls.minDistance = 60;
 controls.maxDistance = 20000;
 
-const ambientLight = new THREE.AmbientLight(0x404040, 2); 
+const ambientLight = new THREE.AmbientLight(0x404040, 2);
 scene.add(ambientLight);
 
 const hemiLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1.5);
@@ -161,7 +161,7 @@ loader.load(window.APP_CONFIG.assetsBaseUrl + 'moon.glb', (gltf) => {
 
 const satelliteMeshes = [];
 const satellitesData = [];
-const satelliteRegistry = {}; 
+const satelliteRegistry = {};
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -170,6 +170,9 @@ const infoPanel = document.getElementById('info-panel');
 let lockedSatellite = null;
 let selectionBox = null;
 let lastLockedSatPos = null;
+let viewMode = 'ORBIT'; // 'ORBIT' or 'HORIZON'
+
+
 
 const satelliteSelect = document.getElementById('satellite-select');
 
@@ -180,7 +183,7 @@ fetch(window.APP_CONFIG.satellitesDataUrl)
             createSatellite(sat, index);
 
             const option = document.createElement('option');
-            option.value = index; 
+            option.value = index;
             option.innerText = sat.name;
             satelliteSelect.appendChild(option);
         });
@@ -191,13 +194,10 @@ satelliteSelect.addEventListener('change', (e) => {
     const selectedIndex = e.target.value;
 
     if (selectedIndex === "") {
-        
-        satelliteMeshes.forEach(mesh => mesh.visible = true); 
+        satelliteMeshes.forEach(mesh => mesh.visible = true);
         unlockSatellite();
     } else {
-
         const targetMesh = satelliteRegistry[selectedIndex];
-
         if (targetMesh) {
             if (lockedSatellite !== targetMesh) {
                 lockOnSatellite(targetMesh);
@@ -205,6 +205,8 @@ satelliteSelect.addEventListener('change', (e) => {
         }
     }
 });
+
+
 
 function createSatellite(data, index) {
     const modelFile = data.modelFileName || 'satellite.glb';
@@ -345,29 +347,39 @@ window.addEventListener('keyup', (e) => {
 
 
 function updateSatellites(delta) {
-    if (isPaused) return;
-
     if (!window.simTime) window.simTime = new Date();
-window.simTime = new Date(window.simTime.getTime() + delta * 1000 * REAL_SEC_TO_SIM_SEC * timeScaleFactor);
+
+    // Only advance time if not paused
+    if (!isPaused) {
+        window.simTime = new Date(window.simTime.getTime() + delta * 1000 * REAL_SEC_TO_SIM_SEC * timeScaleFactor);
+    }
 
     const now = window.simTime;
 
-    if (earthMesh) {
+    if (earthMesh && !isPaused) {
         const earthRotationSpeed = (2 * Math.PI) / 86400;
         earthMesh.rotation.y += earthRotationSpeed * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
     }
 
-    if (clouds) {
+    if (clouds && !isPaused) {
         clouds.rotation.y += ((2 * Math.PI) / 86400) * 1.5 * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
     }
 
     if (moonMesh) {
-        const moonPeriod = 2332800; 
+        const moonPeriod = 2332800;
         const moonSpeed = (2 * Math.PI) / moonPeriod;
-        moonMesh.rotation.y += moonSpeed * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
+
+        if (!isPaused) {
+            moonMesh.rotation.y += moonSpeed * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
+        }
 
         const currentAngle = Math.atan2(moonMesh.position.z, moonMesh.position.x);
-        const newAngle = currentAngle + moonSpeed * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
+        let newAngle = currentAngle;
+
+        if (!isPaused) {
+            newAngle += moonSpeed * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
+        }
+
         moonMesh.position.x = MOON_DISTANCE * Math.cos(newAngle);
         moonMesh.position.z = MOON_DISTANCE * Math.sin(newAngle);
     }
@@ -383,12 +395,13 @@ window.simTime = new Date(window.simTime.getTime() + delta * 1000 * REAL_SEC_TO_
             const positionAndVelocity = satellite.propagate(data.satrec, now);
             const positionEci = positionAndVelocity.position;
 
-            if (positionEci) { 
-                const scale = SCENE_EARTH_RADIUS / EARTH_RADIUS_KM; 
+            if (positionEci) {
+                const scale = SCENE_EARTH_RADIUS / EARTH_RADIUS_KM;
 
                 const x = positionEci.x * scale;
-                const y = positionEci.z * scale; 
-                const z = -positionEci.y * scale; 
+                const y = positionEci.z * scale;
+                const z = -positionEci.y * scale;
+                mesh.position.set(x, y, z);
 
                 const velocityEci = positionAndVelocity.velocity;
                 const v = Math.sqrt(velocityEci.x * velocityEci.x + velocityEci.y * velocityEci.y + velocityEci.z * velocityEci.z);
@@ -402,10 +415,13 @@ window.simTime = new Date(window.simTime.getTime() + delta * 1000 * REAL_SEC_TO_
                 }
             }
         } else {
-             const periodSeconds = data.period_minutes * 60;
+            const periodSeconds = data.period_minutes * 60;
             const angularSpeed = (2 * Math.PI) / periodSeconds;
             if (!data.angle) data.angle = 0;
-            data.angle += angularSpeed * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
+
+            if (!isPaused) {
+                data.angle += angularSpeed * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
+            }
 
             const altitudeKm = data.altitude_km;
             const r = SCENE_EARTH_RADIUS * (1 + altitudeKm / EARTH_RADIUS_KM);
@@ -433,13 +449,15 @@ function onMouseMove(event) {
 }
 
 function onClick(event) {
-    if (lockedSatellite) {
-        lockedSatellite = null;
-        infoPanel.style.display = 'none';
-        checkIntersection(true);
-    } else {
-        checkIntersection(true);
+    if (event.target.closest('#satellite-selector-container') ||
+        event.target.closest('#main-control-panel') ||
+        event.target.closest('#info-panel') ||
+        event.target.closest('#reset-view-btn') ||
+        event.target.closest('#switch-view-btn') ||
+        event.target.closest('#sat-message')) {
+        return;
     }
+    checkIntersection(true);
 }
 
 function checkIntersection(isClick = false) {
@@ -467,13 +485,7 @@ function checkIntersection(isClick = false) {
                 }
             } else {
                 if (lockedSatellite) {
-                    lockedSatellite = null;
-                    if (selectionBox) {
-                        scene.remove(selectionBox);
-                        selectionBox = null;
-                    }
-                    infoPanel.style.display = 'none';
-                    checkIntersection(false);
+                    unlockSatellite();
                 }
             }
         } else {
@@ -491,7 +503,9 @@ function checkIntersection(isClick = false) {
             tooltip.style.display = 'none';
 
             if (isClick) {
-                lockOnSatellite(target);
+                if (lockedSatellite !== target) {
+                    lockOnSatellite(target);
+                }
             } else {
                 if (!lockedSatellite) {
                     showInfoPanel(data);
@@ -576,9 +590,9 @@ function getContinentAtUV(uv) {
     const isBlue = b > THRESHOLD_HIGH;
 
     if (isRed && isGreen && isBlue) return "Antarctica";
-    if (isRed && isGreen && !isBlue) return "Africa"; 
-    if (isRed && !isGreen && isBlue) return "Asia";   
-    if (!isRed && isGreen && isBlue) return "Oceania"; 
+    if (isRed && isGreen && !isBlue) return "Africa";
+    if (isRed && !isGreen && isBlue) return "Asia";
+    if (!isRed && isGreen && isBlue) return "Oceania";
     if (isRed && !isGreen && !isBlue) return "North America";
     if (!isRed && isGreen && !isBlue) return "South America";
     if (!isRed && !isGreen && isBlue) return "Europe";
@@ -599,8 +613,8 @@ function animate() {
     const delta = clock.getDelta();
     updateSatellites(delta);
 
-    
-    const rotateSpeed = 1.0 * delta; 
+
+    const rotateSpeed = 1.0 * delta;
     if (keyState.ArrowLeft) {
         const offset = new THREE.Vector3().copy(camera.position).sub(controls.target);
         offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotateSpeed);
@@ -646,7 +660,17 @@ function animate() {
 
         if (!lastLockedSatPos) lastLockedSatPos = new THREE.Vector3();
         lastLockedSatPos.copy(currentSatPos);
-        controls.target.set(0, 0, 0);
+
+        if (viewMode === 'ORBIT') {
+            // Keep Soft Lock rotation from above
+        } else {
+            // Horizon mode also uses Soft Lock now (via quaternion above)
+            // just initial placement differs
+        }
+
+        // Always lock target to satellite
+        controls.target.copy(lockedSatellite.position);
+
         const msg = document.getElementById('sat-message');
         if (msg.style.display !== 'none' && !msg.classList.contains('fade-out')) {
             const tempV = new THREE.Vector3().copy(lockedSatellite.position);
@@ -678,10 +702,10 @@ animate();
 
 
 
-function lockOnSatellite(mesh) {
+function lockOnSatellite(mesh, forceUpdate = false) {
     if (!mesh) return;
 
-    if (lockedSatellite !== mesh) {
+    if (lockedSatellite !== mesh || forceUpdate) {
         lockedSatellite = mesh;
         playClickSound();
         showInfoPanel(mesh.userData);
@@ -691,15 +715,42 @@ function lockOnSatellite(mesh) {
         const safeDist = dist * 1.2;
 
         const currentCamDist = camera.position.length();
-  const targetDist = Math.max(currentCamDist, safeDist);
+        const targetDist = Math.max(currentCamDist, safeDist);
 
-              const offset = satPos.clone().normalize().multiplyScalar(targetDist);
+        const offset = satPos.clone().normalize().multiplyScalar(targetDist);
 
-        camera.position.copy(offset);
-        controls.target.set(0, 0, 0);
+        if (viewMode === 'HORIZON') {
+            // Close-up Tilted View
+            // Base distance on scale
+            const s = mesh.scale.x || 1.0;
+            const closeDist = s * 50.0; // Adjustable zoom factor
+
+            // Radial vector
+            const radial = satPos.clone().normalize();
+
+            // Tangent vector for tilt axis (approx East)
+            const up = new THREE.Vector3(0, 1, 0);
+            let tangent = new THREE.Vector3().crossVectors(up, radial).normalize();
+            if (tangent.lengthSq() < 0.1) tangent.set(1, 0, 0); // Handle pole case
+
+            // Tilt vector: Rotate Radial by 30 deg around Tangent
+            const tiltVec = radial.clone().applyAxisAngle(tangent, Math.PI / 6);
+
+            // Position = SatPos + TiltVec * Dist
+            const viewPos = satPos.clone().add(tiltVec.multiplyScalar(closeDist));
+
+            camera.position.copy(viewPos);
+            controls.target.copy(mesh.position);
+        } else {
+            // ORBIT Mode (Standard Fly-To)
+            camera.position.copy(offset);
+            controls.target.copy(mesh.position);
+        }
+
         controls.update();
 
         document.getElementById('reset-view-btn').style.display = 'inline-block';
+        document.getElementById('switch-view-btn').style.display = 'inline-block';
 
         const msg = document.getElementById('sat-message');
         msg.innerText = getSatelliteMessage(mesh.userData.name);
@@ -716,6 +767,7 @@ function lockOnSatellite(mesh) {
         satelliteMeshes.forEach(m => {
             m.visible = (m === mesh);
         });
+
 
         const select = document.getElementById('satellite-select');
         for (let i = 0; i < select.options.length; i++) {
@@ -754,7 +806,10 @@ function unlockSatellite() {
         document.getElementById('satellite-select').value = "";
         satelliteMeshes.forEach(mesh => mesh.visible = true);
         document.getElementById('reset-view-btn').style.display = 'none';
+        document.getElementById('switch-view-btn').style.display = 'none';
         document.getElementById('sat-message').style.display = 'none';
+
+        viewMode = 'ORBIT'; // Reset mode
 
         controls.target.set(0, 0, 0);
         camera.position.set(150, 50, 150);
@@ -764,4 +819,12 @@ function unlockSatellite() {
 
 document.getElementById('reset-view-btn').addEventListener('click', () => {
     unlockSatellite();
+});
+
+document.getElementById('switch-view-btn').addEventListener('click', () => {
+    if (!lockedSatellite) return;
+    viewMode = (viewMode === 'ORBIT') ? 'HORIZON' : 'ORBIT';
+
+    // Re-trigger lock logic to snap camera immediately
+    lockOnSatellite(lockedSatellite, true);
 });

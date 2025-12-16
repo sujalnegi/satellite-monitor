@@ -27,17 +27,22 @@
     <div id="sat-message" class="speech-bubble">Hey!! I am here</div>
 
     <div id="satellite-selector-container"
-        style="position: absolute; top: 20px; left: 20px; background: rgba(20, 20, 30, 0.9); padding: 10px 15px; border-radius: 8px; border: 1px solid #444; z-index: 1000; backdrop-filter: blur(5px); color: white;">
-        <label for="satellite-select" style="margin-right: 10px; font-weight: bold; color: #4facfe;">Select
-            Satellite:</label>
+        style="position: absolute; top: 20px; left: 20px; background: rgba(20, 20, 30, 0.9); padding: 8px 12px; border-radius: 8px; border: 1px solid #444; z-index: 1000; backdrop-filter: blur(5px); color: white;">
+        <label for="satellite-select" style="margin-right: 5px; font-weight: bold; color: #4facfe;">Find:</label>
         <select id="satellite-select"
             style="background: rgba(0,0,0,0.5); color: white; border: 1px solid #666; padding: 5px; border-radius: 4px; cursor: pointer;">
-            <option value="">-- None --</option>
+            <option value="">-- Select Satellite --</option>
         </select>
-        <button id="reset-view-btn"
-            style="display: none; margin-left: 10px; background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Back
-            to Normal</button>
     </div>
+
+    <button id="reset-view-btn"
+        style="display: none; position: absolute; top: 70px; left: 20px; background: #ff4757; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; z-index: 1000; box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);">
+        Reset View
+    </button>
+    <button id="switch-view-btn"
+        style="display: none; position: absolute; top: 70px; left: 140px; background: #4facfe; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; z-index: 1000; box-shadow: 0 0 10px rgba(79, 172, 254, 0.5);">
+        Switch View
+    </button>
 
     <div id="zoom-controls">
         <button id="zoom-in">+</button>
