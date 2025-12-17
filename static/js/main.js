@@ -205,9 +205,19 @@ satelliteSelect.addEventListener('change', (e) => {
 function getOrbitPoints(data, startTime) {
     if (!data.satrec) return [];
 
+    let period = 100; // Default 100 mins
+    if (data.satrec.no) {
+        // satrec.no is mean motion in rads/min
+        period = (2 * Math.PI) / data.satrec.no;
+    }
+
+    // Trace slightly more than one orbit to close the loop
+    const duration = period * 1.05;
     const points = [];
-    const duration = 100; // minutes (approx 1 orbit)
-    const step = 1.0;
+
+    // Adaptive step size: ~720 points per orbit, min 0.5 mins
+    let step = period / 720;
+    if (step < 0.5) step = 0.5;
 
     for (let i = 0; i <= duration; i += step) {
         const t = new Date(startTime.getTime() + i * 60000);
@@ -783,6 +793,8 @@ function getSatelliteMessage(name) {
     if (n.includes('james webb')) return "Unfolding the cosmos history.";
     if (n.includes('telescope')) return "Watching the stars.";
     if (n.includes('goes')) return "Tracking storms and weather!";
+    if (n.includes('aqua')) return "Observing Earth's water cycle.";
+    if (n.includes('jason')) return "Mapping the ocean's surface height.";
 
     return "Hey!! I am here";
 }

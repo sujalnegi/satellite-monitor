@@ -42,5 +42,27 @@
         "modelFileName": "goes.glb",
         "tle1": "1 41866U 16071A   23340.50000000  .00000000  00000-0  00000-0 0  9993",
         "tle2": "2 41866   0.0000 284.8000 0001000   0.0000   0.0000  1.00270000 25006"
+    },
+    {
+        "name": "Aqua (EOS PM-1)",
+        "launch": "Vandenberg AFB, USA",
+        "agency": "NASA",
+        "altitude_km": 702,
+        "inclination": 98.4,
+        "period_minutes": 98.5,
+        "modelFileName": "aqua.glb",
+        "tle1": "1 27424U 02022A 25347.32475433 .00001965 00000-0 40328-3 0 9998",
+        "tle2": "2 27424 98.4037 308.2133 0001151 114.8190 47.6819 14.61812555256112"
+    },
+    {
+        "name": "Jason-3 (Oceanography)",
+        "launch": "Vandenberg AFB, USA",
+        "agency": "NOAA / CNES / EUMETSAT",
+        "altitude_km": 1336,
+        "inclination": 66.0,
+        "period_minutes": 111.8,
+        "modelFileName": "jason_3.glb",
+        "tle1": "1 41240U 16002A 25301.54632931 -.00000021 00000-0 16278-3 0 9995",
+        "tle2": "2 41240 66.0411 252.8366 0007723 268.2607 91.7528 12.87626472457422"
     }
 ]
