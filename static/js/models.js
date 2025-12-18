@@ -1,8 +1,89 @@
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+const modelsData = [
+    {
+        name: 'ISS',
+        file: 'iss.glb',
+        preview: 'iss.png',
+        description: 'International Space Station - A modular space station in low Earth orbit, serving as a microgravity research laboratory.',
+        category: 'spacecraft',
+        tags: ['Spacecraft', 'LEO', 'Research']
+    },
+    {
+        name: 'Hubble',
+        file: 'hubble.glb',
+        preview: 'hubble.png',
+        description: 'Hubble Space Telescope - One of the largest and most versatile space telescopes, providing stunning images of the universe.',
+        category: 'satellite',
+        tags: ['Telescope', 'LEO', 'Observatory']
+    },
+    {
+        name: 'Jason-3',
+        file: 'Jason_3.glb',
+        preview: 'jason_3.png',
+        description: 'Jason-3 Satellite - Ocean surface topography mission satellite for monitoring sea level and ocean circulation.',
+        category: 'satellite',
+        tags: ['Earth Observation', 'Ocean', 'Climate']
+    },
+    {
+        name: 'Aqua',
+        file: 'aqua.glb',
+        preview: 'aqua.png',
+        description: 'Aqua Satellite - NASA Earth Science satellite collecting data about Earth\'s water cycle and climate systems.',
+        category: 'satellite',
+        tags: ['Earth Observation', 'Climate', 'Water']
+    },
+    {
+        name: 'GOES',
+        file: 'goes.glb',
+        preview: 'goes.png',
+        description: 'GOES Satellite - Geostationary Operational Environmental Satellite for weather monitoring and forecasting.',
+        category: 'satellite',
+        tags: ['Weather', 'GEO', 'Monitoring']
+    },
+    {
+        name: 'Sputnik 1',
+        file: 'sputnik_1.glb',
+        preview: 'sputnik_1.png',
+        description: 'Sputnik 1 - The first artificial Earth satellite launched by the Soviet Union in 1957 marking the start of the Space Age.',
+        category: 'satellite',
+        tags: ['Historic', 'LEO', 'Pioneer']
+    },
+    {
+        name: 'Earth',
+        file: 'earth.glb',
+        preview: 'earth.png',
+        description: 'Planet Earth - Our home planet, the third planet from the Sun and the only known planet to harbor life.',
+        category: 'celestial',
+        tags: ['Planet', 'Terrestrial', 'Home']
+    },
+    {
+        name: 'Moon',
+        file: 'moon.glb',
+        preview: 'moon.png',
+        description: 'The Moon - Earth\'s only natural satellite, the fifth largest moon in the Solar System.',
+        category: 'celestial',
+        tags: ['Natural Satellite', 'Rocky', 'Tidally Locked']
+    },
+    {
+        name: 'Sun',
+        file: 'sun.glb',
+        preview: 'sun.png',
+        description: 'The Sun - The star at the center of our Solar System, providing light and energy to all planets.',
+        category: 'celestial',
+        tags: ['Star', 'G-type', 'Energy Source']
+    },
+    {
+        name: 'UFO',
+        file: 'ufo.glb',
+        preview: 'ufo.png',
+        description: 'UFO Model - An unidentified flying object model for creative visualization and entertainment purposes.',
+        category: 'spacecraft',
+        tags: ['Fictional', 'Spacecraft', 'Fun']
+    }
+];
 
-const loader = new GLTFLoader();
 const modelsGrid = document.getElementById('modelsGrid');
+const filterBtns = document.querySelectorAll('.filter-btn');
+const scrollTopBtn = document.getElementById('scrollTop');
 
 function createModelCard(modelData) {
     const card = document.createElement('div');
@@ -11,7 +92,18 @@ function createModelCard(modelData) {
 
     const preview = document.createElement('div');
     preview.className = 'model-preview';
-    preview.innerHTML = '<div class="loading-placeholder"></div>';
+
+    const img = document.createElement('img');
+    img.alt = modelData.name;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.style.display = 'block';
+    img.onerror = () => {
+        preview.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: rgba(255,255,255,0.5); font-size: 0.9rem;">Image not available</div>';
+    };
+    img.src = `/static/assets/previews/${modelData.preview}`;
+    preview.appendChild(img);
 
     const info = document.createElement('div');
     info.className = 'model-info';
@@ -24,74 +116,65 @@ function createModelCard(modelData) {
     description.className = 'model-description';
     description.textContent = modelData.description;
 
+    const meta = document.createElement('div');
+    meta.className = 'model-meta';
+    const categoryTag = document.createElement('span');
+    categoryTag.className = 'meta-tag';
+    categoryTag.textContent = modelData.category.charAt(0).toUpperCase() + modelData.category.slice(1);
+    meta.appendChild(categoryTag);
+
     info.appendChild(name);
     info.appendChild(description);
+    info.appendChild(meta);
 
     card.appendChild(preview);
     card.appendChild(info);
 
-    load3DModel(preview, modelData.file);
-
     return card;
 }
 
-function load3DModel(container, filename) {``
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 0.1, 1000);
-    camera.position.z = 3;
-
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(container.offsetWidth, container.offsetHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    scene.add(ambientLight);
-
-    const directionalLight1 = new THREE.DirectionalLight(0x4facfe, 1.5);
-    directionalLight1.position.set(5, 5, 5);
-    scene.add(directionalLight1);
-
-    const directionalLight2 = new THREE.DirectionalLight(0x00f2fe, 1);
-    directionalLight2.position.set(-5, -5, -5);
-    scene.add(directionalLight2);
-
-    const modelPath = window.ASSETS_BASE_PATH + filename;
-    loader.load(
-        modelPath,
-        (gltf) => {
-            const model = gltf.scene;
-
-            const box = new THREE.Box3().setFromObject(model);
-            const center = box.getCenter(new THREE.Vector3());
-            const size = box.getSize(new THREE.Vector3());
-            const maxDim = Math.max(size.x, size.y, size.z);
-            const scale = 2 / maxDim;
-
-            model.position.sub(center);
-            model.scale.multiplyScalar(scale);
-
-            scene.add(model);
-
-            container.innerHTML = '';
-            container.appendChild(renderer.domElement);
-
-            function animate() {
-                requestAnimationFrame(animate);
-                model.rotation.y += 0.005;
-                renderer.render(scene, camera);
-            }
-            animate();
-        },
-        undefined,
-        (error) => {
-            console.error('Error loading model:', error);
-            container.innerHTML = '<div style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Model unavailable</div>';
-        }
-    );
-}
 modelsData.forEach(modelData => {
     const card = createModelCard(modelData);
     modelsGrid.appendChild(card);
-}
+});
 
-);
+filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filter = btn.dataset.filter;
+        const cards = document.querySelectorAll('.model-card');
+
+        cards.forEach(card => {
+            if (filter === 'all' || card.dataset.category === filter) {
+                card.style.display = 'block';
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 10);
+            } else {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.display = 'none';
+                }, 300);
+            }
+        });
+    });
+});
+
+window.addEventListener('scroll', () => {
+    if (window.pageYOffset > 300) {
+        scrollTopBtn.classList.add('visible');
+    } else {
+        scrollTopBtn.classList.remove('visible');
+    }
+});
+
+scrollTopBtn.addEventListener('click', () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+});

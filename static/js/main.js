@@ -250,24 +250,15 @@ satelliteSelect.addEventListener('change', (e) => {
         }
     }
 });
-
-
-
-
 function getOrbitPoints(data, startTime) {
     if (!data.satrec) return [];
 
-    let period = 100; // Default 100 mins
+    let period = 100; 
     if (data.satrec.no) {
-        // satrec.no is mean motion in rads/min
         period = (2 * Math.PI) / data.satrec.no;
     }
-
-    // Trace slightly more than one orbit to close the loop
     const duration = period * 1.05;
     const points = [];
-
-    // Adaptive step size: ~720 points per orbit, min 0.5 mins
     let step = period / 720;
     if (step < 0.5) step = 0.5;
 
@@ -459,7 +450,6 @@ function updateSatellites(delta) {
     const now = window.simTime;
 
     if (earthMesh) {
-        // Sync Earth rotation to actual Greenwich Sidereal Time
         const gmst = satellite.gstime(now);
         earthMesh.rotation.y = gmst;
     }
@@ -582,8 +572,6 @@ function checkIntersection(isClick = false) {
     if (intersects.length > 0) {
         const object = intersects[0].object;
         let target = object;
-
-        // Traverse up
         while (target) {
             if (target === earthMesh) break;
             if (target.userData && target.userData.isSatelliteRoot) break;

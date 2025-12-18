@@ -87,6 +87,42 @@ body {
     margin: 0 auto;
     line-height: 1.6;
 }
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 50px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 12px 24px;
+    background: rgba(79, 172, 254, 0.1);
+    border: 1px solid rgba(79, 172, 254, 0.3);
+    border-radius: 25px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-btn:hover {
+    background: rgba(79, 172, 254, 0.2);
+    border-color: #4facfe;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border-color: transparent;
+    color: #0a0e27;
+    box-shadow: 0 5px 20px rgba(79, 172, 254, 0.5);
+}
 
 .models-grid {
     display: grid;
@@ -164,6 +200,24 @@ body {
     margin-bottom: 20px;
 }
 
+.model-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.meta-tag {
+    padding: 6px 12px;
+    background: rgba(79, 172, 254, 0.15);
+    border: 1px solid rgba(79, 172, 254, 0.3);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .loading-placeholder {
     width: 80px;
     height: 80px;
@@ -177,6 +231,32 @@ body {
     to {
         transform: rotate(360deg);
     }
+}
+.scroll-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border: none;
+    border-radius: 50%;
+    color: #0a0e27;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 99;
+    box-shadow: 0 5px 20px rgba(79, 172, 254, 0.4);
+}
+
+.scroll-top.visible {
+    opacity: 1;
+}
+
+.scroll-top:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(79, 172, 254, 0.6);
 }
 
 @media (max-width: 768px) {
