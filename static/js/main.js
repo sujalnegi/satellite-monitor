@@ -8,7 +8,7 @@ window.scene = scene;
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50000);
 camera.position.set(150, 50, 150);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
@@ -108,6 +108,58 @@ function createStarfield() {
     scene.add(stars);
 }
 createStarfield();
+
+function createNebula() {
+    const nebulaGeo = new THREE.BufferGeometry();
+    const nebulaCount = 3000;
+    const positions = new Float32Array(nebulaCount * 3);
+    const colors = new Float32Array(nebulaCount * 3);
+    const sizes = new Float32Array(nebulaCount);
+
+    const nebulaColors = [
+        new THREE.Color(0x4a0e4e),
+        new THREE.Color(0x1e3a8a),
+        new THREE.Color(0x7c2d12),
+        new THREE.Color(0x1e1b4b),
+        new THREE.Color(0x581c87),
+        new THREE.Color(0x0c4a6e)
+    ];
+
+    for (let i = 0; i < nebulaCount; i++) {
+        const r = 2000 + Math.random() * 3000;
+        const theta = 2 * Math.PI * Math.random();
+        const phi = Math.acos(2 * Math.random() - 1);
+
+        positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        positions[i * 3 + 2] = r * Math.cos(phi);
+
+        const color = nebulaColors[Math.floor(Math.random() * nebulaColors.length)];
+        colors[i * 3] = color.r;
+        colors[i * 3 + 1] = color.g;
+        colors[i * 3 + 2] = color.b;
+
+        sizes[i] = 50 + Math.random() * 150;
+    }
+
+    nebulaGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    nebulaGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    nebulaGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+    const nebulaMat = new THREE.PointsMaterial({
+        size: 100,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.15,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true
+    });
+
+    const nebula = new THREE.Points(nebulaGeo, nebulaMat);
+    scene.add(nebula);
+}
+createNebula();
 
 
 
@@ -834,11 +886,23 @@ document.getElementById('switch-view-btn').addEventListener('click', () => {
 
 document.getElementById('download-view-btn').addEventListener('click', () => {
     try {
+        const originalWidth = renderer.domElement.width;
+        const originalHeight = renderer.domElement.height;
+        const scaleFactor = 2;
+
+        renderer.setSize(originalWidth * scaleFactor, originalHeight * scaleFactor, false);
+        camera.aspect = originalWidth / originalHeight;
+        camera.updateProjectionMatrix();
+        renderer.render(scene, camera);
+
         const link = document.createElement('a');
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
         link.download = `satellite-view-${timestamp}.png`;
         link.href = renderer.domElement.toDataURL('image/png');
         link.click();
+
+        renderer.setSize(originalWidth, originalHeight, false);
+        camera.updateProjectionMatrix();
     } catch (error) {
         console.error('Error downloading view:', error);
         alert('Failed to download view. Please try again.');
