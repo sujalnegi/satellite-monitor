@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Models Gallery - Where is this Satellite?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/models.css') }}">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="stars"></div>
+    <div class="container">
+        <div class="header">
+            <h1>3D Models Gallery</h1>
+            <p>Explore our collection of high-quality 3D models used in the satellite tracking simulation. Each model is
+                carefully crafted to provide an immersive and realistic experience.</p>
+        </div>
+        <div class="models-grid" id="modelsGrid">
+        </div>
+    </div>
+    <script>
+        window.ASSETS_BASE_PATH = "{{ url_for('static', filename='assets/') }}";
+    </script>
+    <script type="module" src="{{ url_for('static', filename='js/models.js') }}"></script>
+</body>
+
+</html>
