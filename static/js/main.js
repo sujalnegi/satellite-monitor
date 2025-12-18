@@ -830,4 +830,17 @@ document.getElementById('switch-view-btn').addEventListener('click', () => {
     viewMode = (viewMode === 'ORBIT') ? 'HORIZON' : 'ORBIT';
 
     lockOnSatellite(lockedSatellite, true);
+});
+
+document.getElementById('download-view-btn').addEventListener('click', () => {
+    try {
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        link.download = `satellite-view-${timestamp}.png`;
+        link.href = renderer.domElement.toDataURL('image/png');
+        link.click();
+    } catch (error) {
+        console.error('Error downloading view:', error);
+        alert('Failed to download view. Please try again.');
+    }
 }); 
