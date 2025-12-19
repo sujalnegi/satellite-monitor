@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Viewer - {{ model_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modelviewer.css') }}">
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <div class="viewer-container">
+        <div class="header-bar">
+            <a href="/models" class="back-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back to Gallery
+            </a>
+            <h1 class="model-title" id="modelTitle">{{ model_name }}</h1>
+        </div>
+
+        <div id="canvas-container"></div>
+
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <p>Loading 3D Model...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage" style="display: none;">
+            <p>Failed to load 3D model</p>
+            <a href="/models" class="back-link">Return to Gallery</a>
+        </div>
+    </div>
+
+    <script type="module" src="{{ url_for('static', filename='js/modelviewer.js') }}"></script>
+    <script>
+        window.MODEL_NAME = "{{ model_name }}";
+    </script>
+</body>
+
+</html>

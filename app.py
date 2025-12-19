@@ -18,6 +18,10 @@ def instructions():
 def models():
     return render_template('models.html')
 
+@app.route('/modelviewer/<model_name>')
+def modelviewer(model_name):
+    return render_template('modelviewer.html', model_name=model_name)
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
