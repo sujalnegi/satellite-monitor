@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const modelsData = {
     'ISS': { file: 'iss.glb', scale: 0.01, name: 'International Space Station' },
-    'Hubble': { file: 'hubble.glb', scale: 0.5, name: 'Hubble Space Telescope' },
+    'Hubble': { file: 'hubble.glb', scale: 0.08, name: 'Hubble Space Telescope' },
     'Jason-3': { file: 'Jason_3.glb', scale: 0.3, name: 'Jason-3 Satellite' },
     'Aqua': { file: 'aqua.glb', scale: 0.3, name: 'Aqua Satellite' },
-    'GOES': { file: 'goes.glb', scale: 0.3, name: 'GOES Satellite' },
+    'GOES': { file: 'goes.glb', scale: 1.5, name: 'GOES Satellite' },
     'Sputnik 1': { file: 'sputnik_1.glb', scale: 1, name: 'Sputnik 1' },
     'Earth': { file: 'earth.glb', scale: 1, name: 'Earth' },
     'Moon': { file: 'moon.glb', scale: 1, name: 'Moon' },
@@ -32,7 +33,7 @@ class ModelViewer {
 
     init() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x000000);
+        this.scene.background = new THREE.Color(0x2a2a2a);
         this.camera = new THREE.PerspectiveCamera(
             45,
             window.innerWidth / window.innerHeight,
@@ -53,12 +54,15 @@ class ModelViewer {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
-        this.controls.minDistance = 2;
-        this.controls.maxDistance = 20;
+        this.controls.enableZoom = true;
+        this.controls.zoomSpeed = 1.0;
+        this.controls.minDistance = 0.5;
+        this.controls.maxDistance = 50;
         this.controls.autoRotate = false;
         this.controls.autoRotateSpeed = 0;
 
         this.setupLights();
+        this.setupGrid();
 
         this.loadModel();
 
@@ -87,6 +91,12 @@ class ModelViewer {
         this.scene.add(hemiLight);
     }
 
+    setupGrid() {
+        const gridHelper = new THREE.GridHelper(20, 20, 0x666666, 0x444444);
+        gridHelper.position.y = -2;
+        this.scene.add(gridHelper);
+    }
+
     loadModel() {
         const modelInfo = modelsData[this.modelName];
 
@@ -97,7 +107,13 @@ class ModelViewer {
 
         document.getElementById('modelTitle').textContent = modelInfo.name;
 
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+        dracoLoader.setDecoderConfig({ type: 'js' });
+
         const loader = new GLTFLoader();
+        loader.setDRACOLoader(dracoLoader);
+
         const modelPath = `/static/assets/${modelInfo.file}`;
 
         loader.load(
@@ -109,13 +125,15 @@ class ModelViewer {
 
                 const box = new THREE.Box3().setFromObject(this.model);
                 const center = box.getCenter(new THREE.Vector3());
-                this.model.position.sub(center);
+                this.model.position.x = -center.x;
+                this.model.position.y = -center.y;
+                this.model.position.z = -center.z;
 
                 const size = box.getSize(new THREE.Vector3());
                 const maxDim = Math.max(size.x, size.y, size.z);
                 const fov = this.camera.fov * (Math.PI / 180);
                 let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-                cameraZ *= 2.5; 
+                cameraZ *= 2.5;
 
                 this.camera.position.set(cameraZ, cameraZ * 0.6, cameraZ);
                 this.camera.lookAt(0, 0, 0);
