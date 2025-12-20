@@ -54,6 +54,7 @@ body {
 .header {
     text-align: center;
     margin-bottom: 60px;
+    position: relative;
 }
 
 .header h1 {
@@ -87,6 +88,30 @@ body {
     margin: 0 auto;
     line-height: 1.6;
 }
+
+.back-to-station {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 12px 24px;
+    background: rgba(79, 172, 254, 0.1);
+    border: 2px solid rgba(79, 172, 254, 0.5);
+    border-radius: 8px;
+    color: #4facfe;
+    text-decoration: none;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7rem;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.back-to-station:hover {
+    background: rgba(79, 172, 254, 0.2);
+    border-color: #4facfe;
+    color: #fff;
+    box-shadow: 0 5px 20px rgba(79, 172, 254, 0.4);
+}
+
 .filters {
     display: flex;
     justify-content: center;
@@ -232,6 +257,7 @@ body {
         transform: rotate(360deg);
     }
 }
+
 .scroll-top {
     position: fixed;
     bottom: 30px;

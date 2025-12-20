@@ -203,6 +203,7 @@
             text-shadow: 0 0 20px #fff, 0 0 40px #00f2fe !important;
             transform: scale(1.2);
         }
+
         .instruction-btn {
             display: block;
             margin: 20px auto 0;
@@ -263,6 +264,7 @@
         </div>
 
         <a href="{{ url_for('instructions') }}" class="instruction-btn">MISSION MANUAL</a>
+        <a href="{{ url_for('models') }}" class="instruction-btn">EXPLORE 3D MODELS</a>
 
         <div class="loading-container">
             <div class="loading-bar-bg">
@@ -280,10 +282,10 @@
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-        camera.position.z = 2.5; 
+        camera.position.z = 2.5;
 
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(120, 120); 
+        renderer.setSize(120, 120);
         renderer.setPixelRatio(window.devicePixelRatio);
         sat.appendChild(renderer.domElement);
 
@@ -301,9 +303,9 @@
             const size = new THREE.Vector3();
             box.getSize(size);
             const maxDim = Math.max(size.x, size.y, size.z);
-            const scale = 1.5 / maxDim; 
+            const scale = 1.5 / maxDim;
             ufoMesh.scale.set(scale, scale, scale);
-            
+
             ufoMesh.rotation.x = 0.5;
 
             scene.add(ufoMesh);
@@ -312,7 +314,7 @@
         function animate3D() {
             requestAnimationFrame(animate3D);
             if (ufoMesh) {
-                ufoMesh.rotation.y += 0.05; 
+                ufoMesh.rotation.y += 0.05;
                 ufoMesh.rotation.z = Math.sin(Date.now() * 0.002) * 0.2;
             }
             renderer.render(scene, camera);
@@ -347,7 +349,7 @@
 
         animateSatellitePosition();
 
-        window.launchRocket = function() {
+        window.launchRocket = function () {
             const container = document.querySelector('.rocket-container');
             const loadingContainer = document.querySelector('.loading-container');
             const progress = document.getElementById('progress-fill');

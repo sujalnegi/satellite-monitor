@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Earth Satellite Simulation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/5.0.0/satellite.min.js"></script>
     <script type="importmap">
@@ -46,6 +47,11 @@
         style="position: absolute; top: 20px; right: 20px; background: #2ecc71; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; z-index: 1000; box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);">
         📸 Download View
     </button>
+
+    <a href="{{ url_for('home') }}" id="back-to-station-btn"
+        style="position: absolute; top: 70px; right: 20px; background: rgba(79, 172, 254, 0.9); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; z-index: 1000; box-shadow: 0 0 10px rgba(79, 172, 254, 0.5); text-decoration: none; display: inline-block; font-family: 'Press Start 2P', cursive; font-size: 0.7rem;">
+        ← LAUNCHING STATION
+    </a>
 
     <div id="zoom-controls">
         <button id="zoom-in">+</button>

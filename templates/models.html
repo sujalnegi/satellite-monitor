@@ -14,8 +14,10 @@
     <div class="stars"></div>
     <div class="container">
         <div class="header">
+            <a href="{{ url_for('home') }}" class="back-to-station">Launching Pad</a>
             <h1>3D Models Gallery</h1>
-            <p>Here are the 3D Models of the satellites and the planets I used in the simulation. Freely explore the models 360 degrees around.</p>
+            <p>Here are the 3D Models of the satellites and the planets I used in the simulation. Freely explore the
+                models 360 degrees around.</p>
         </div>
         <div class="filters">
             <button class="filter-btn active" data-filter="all">All Models</button>
@@ -30,4 +32,5 @@
     <button class="scroll-top" id="scrollTop">↑</button>
     <script type="module" src="{{ url_for('static', filename='js/models.js') }}"></script>
 </body>
+
 </html>
