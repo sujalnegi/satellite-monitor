@@ -51,6 +51,40 @@
         </select>
     </div>
 
+    <button id="add-satellite-btn"
+        style="position: absolute; top: 70px; left: 20px; background: #8e44ad; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: 600; z-index: 1000; box-shadow: 0 0 10px rgba(142, 68, 173, 0.5); font-family: 'Inter', sans-serif; font-size: 0.9rem;">
+        ➕ Add Custom Satellite
+    </button>
+
+    <div id="custom-satellite-dialog"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); z-index: 10000; align-items: center; justify-content: center;">
+        <div
+            style="background: rgba(20, 20, 30, 0.95); padding: 30px; border-radius: 15px; border: 1px solid #4facfe; max-width: 500px; width: 90%; backdrop-filter: blur(10px); margin: auto;">
+            <h2
+                style="margin: 0 0 20px 0; font-family: 'Press Start 2P', cursive; font-size: 1.2rem; color: #4facfe; text-align: center; line-height: 1.6;">
+                Add your own satellite</h2>
+
+            <div style="margin-bottom: 20px;">
+                <label
+                    style="display: block; margin-bottom: 10px; color: #fff; font-family: 'Inter', sans-serif; font-size: 0.9rem;">Select
+                    GLB File:</label>
+                <input type="file" id="satellite-file-input" accept=".glb"
+                    style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(79, 172, 254, 0.5); border-radius: 5px; color: white; font-family: 'Inter', sans-serif; cursor: pointer;">
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="cancel-satellite-btn"
+                    style="padding: 10px 20px; background: #e74c3c; border: none; border-radius: 5px; color: white; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem;">
+                    Cancel
+                </button>
+                <button id="submit-satellite-btn"
+                    style="padding: 10px 20px; background: #2ecc71; border: none; border-radius: 5px; color: white; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem;">
+                    Add Satellite
+                </button>
+            </div>
+        </div>
+    </div>
+
     <button id="reset-view-btn"
         style="display: none; position: absolute; top: 70px; left: 20px; background: #ff4757; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: 600; z-index: 1000; box-shadow: 0 0 10px rgba(255, 71, 87, 0.5); font-family: 'Inter', sans-serif; font-size: 0.9rem;">
         Reset View

@@ -952,6 +952,82 @@ document.getElementById('download-view-btn').addEventListener('click', () => {
         alert('Failed to download view. Please try again.');
     }
 });
+
+// Custom Satellite Upload
+const addSatelliteBtn = document.getElementById('add-satellite-btn');
+const customSatelliteDialog = document.getElementById('custom-satellite-dialog');
+const cancelSatelliteBtn = document.getElementById('cancel-satellite-btn');
+const submitSatelliteBtn = document.getElementById('submit-satellite-btn');
+const satelliteFileInput = document.getElementById('satellite-file-input');
+
+let customSatelliteFile = null;
+
+addSatelliteBtn.addEventListener('click', () => {
+    customSatelliteDialog.style.display = 'flex';
+});
+
+cancelSatelliteBtn.addEventListener('click', () => {
+    customSatelliteDialog.style.display = 'none';
+    satelliteFileInput.value = '';
+    customSatelliteFile = null;
+});
+
+satelliteFileInput.addEventListener('change', (e) => {
+    customSatelliteFile = e.target.files[0];
+});
+
+submitSatelliteBtn.addEventListener('click', () => {
+    if (!customSatelliteFile) {
+        alert('Please select a GLB file first!');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const arrayBuffer = e.target.result;
+
+        loader.parse(arrayBuffer, '', (gltf) => {
+            const model = gltf.scene;
+
+            const box = new THREE.Box3().setFromObject(model);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const targetBaseSize = 250;
+            const normalizationScale = (maxDim > 0) ? (targetBaseSize / maxDim) : 1.0;
+
+            const globalScale = parseFloat(document.getElementById('scale-slider').value);
+            const finalScale = globalScale * normalizationScale;
+            model.scale.set(finalScale, finalScale, finalScale);
+
+            const customSatelliteData = {
+                name: 'Custom Satellite',
+                altitude_km: 400,
+                inclination: 51.6,
+                period_minutes: 90,
+                angle: Math.random() * Math.PI * 2,
+                isSatelliteRoot: true,
+                baseScale: normalizationScale
+            };
+
+            model.userData = customSatelliteData;
+            scene.add(model);
+            satelliteMeshes.push(model);
+            satellitesData.push(customSatelliteData);
+
+            customSatelliteDialog.style.display = 'none';
+            satelliteFileInput.value = '';
+            customSatelliteFile = null;
+
+            alert('Custom satellite added successfully!');
+        }, (error) => {
+            console.error('Error loading custom satellite:', error);
+            alert('Failed to load GLB file. Please make sure it\'s a valid GLB file.');
+        });
+    };
+
+    reader.readAsArrayBuffer(customSatelliteFile);
+});
 /*
 make the rocket animation in the simulation page slow so that in 2seconds it just reaches half of the screen
 
