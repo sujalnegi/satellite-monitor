@@ -52,7 +52,7 @@ const assetsBase = window.APP_CONFIG.assetsBaseUrl;
 
 let earthMesh;
 const loadingStartTime = Date.now();
-const LOADING_DURATION = 2000;
+const LOADING_DURATION = 2000; 
 
 function hideLoadingScreen() {
     const elapsed = Date.now() - loadingStartTime;
@@ -454,25 +454,6 @@ function togglePlayPause() {
 
 playPauseBtn.addEventListener('click', togglePlayPause);
 
-let isReversed = false;
-let timeDirection = 1;
-const reverseTimeBtn = document.getElementById('reverse-time-btn');
-
-function toggleReverseTime() {
-    isReversed = !isReversed;
-    timeDirection = isReversed ? -1 : 1;
-
-    if (isReversed) {
-        reverseTimeBtn.innerText = "▶️ Forward Time";
-        reverseTimeBtn.style.background = "#e74c3c";
-    } else {
-        reverseTimeBtn.innerText = "⏪ Reverse Time";
-        reverseTimeBtn.style.background = "#9b59b6";
-    }
-}
-
-reverseTimeBtn.addEventListener('click', toggleReverseTime);
-
 const keyState = {
     ArrowLeft: false,
     ArrowRight: false,
@@ -500,7 +481,7 @@ window.addEventListener('keyup', (e) => {
 function updateSatellites(delta) {
     if (!window.simTime) window.simTime = new Date();
     if (!isPaused) {
-        window.simTime = new Date(window.simTime.getTime() + delta * 1000 * REAL_SEC_TO_SIM_SEC * timeScaleFactor * timeDirection);
+        window.simTime = new Date(window.simTime.getTime() + delta * 1000 * REAL_SEC_TO_SIM_SEC * timeScaleFactor);
     }
 
     const now = window.simTime;
@@ -952,8 +933,6 @@ document.getElementById('download-view-btn').addEventListener('click', () => {
         alert('Failed to download view. Please try again.');
     }
 });
-
-// Custom Satellite Upload
 const addSatelliteBtn = document.getElementById('add-satellite-btn');
 const customSatelliteDialog = document.getElementById('custom-satellite-dialog');
 const cancelSatelliteBtn = document.getElementById('cancel-satellite-btn');
@@ -1022,17 +1001,9 @@ submitSatelliteBtn.addEventListener('click', () => {
             alert('Custom satellite added successfully!');
         }, (error) => {
             console.error('Error loading custom satellite:', error);
-            alert('Failed to load GLB file. Please make sure it\'s a valid GLB file.');
+            alert('Failed to load GLB file. Please make sure its a valid GLB file.');
         });
     };
 
     reader.readAsArrayBuffer(customSatelliteFile);
 });
-/*
-make the rocket animation in the simulation page slow so that in 2seconds it just reaches half of the screen
-
-add a reverse time feature in the simulation page in which everything moves in reverse oreder add a button in the simulation page at the left bottom above the Pause button
-
-now lets add a 
-
-*/

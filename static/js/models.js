@@ -130,12 +130,9 @@ function createModelCard(modelData) {
     card.appendChild(preview);
     card.appendChild(info);
 
-    // Add click event to navigate to model viewer
     card.addEventListener('click', () => {
         window.location.href = `/modelviewer/${encodeURIComponent(modelData.name)}`;
     });
-
-    // Add hover effect cursor
     card.style.cursor = 'pointer';
 
     return card;
