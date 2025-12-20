@@ -52,7 +52,7 @@ const assetsBase = window.APP_CONFIG.assetsBaseUrl;
 
 let earthMesh;
 const loadingStartTime = Date.now();
-const LOADING_DURATION = 2000; 
+const LOADING_DURATION = 2000;
 
 function hideLoadingScreen() {
     const elapsed = Date.now() - loadingStartTime;
@@ -933,6 +933,63 @@ document.getElementById('download-view-btn').addEventListener('click', () => {
         alert('Failed to download view. Please try again.');
     }
 });
+
+// Toast Notification System
+function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+
+    const bgColor = type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : '#4facfe';
+
+    toast.style.cssText = `
+        background: ${bgColor};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        animation: slideIn 0.3s ease-out;
+        max-width: 300px;
+    `;
+
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Add CSS animations for toast
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Custom Satellite Upload
 const addSatelliteBtn = document.getElementById('add-satellite-btn');
 const customSatelliteDialog = document.getElementById('custom-satellite-dialog');
 const cancelSatelliteBtn = document.getElementById('cancel-satellite-btn');
@@ -957,7 +1014,7 @@ satelliteFileInput.addEventListener('change', (e) => {
 
 submitSatelliteBtn.addEventListener('click', () => {
     if (!customSatelliteFile) {
-        alert('Please select a GLB file first!');
+        showToast('Please select a GLB file first!', 'error');
         return;
     }
 
@@ -980,13 +1037,14 @@ submitSatelliteBtn.addEventListener('click', () => {
             model.scale.set(finalScale, finalScale, finalScale);
 
             const customSatelliteData = {
-                name: 'Custom Satellite',
+                name: 'UFO',
                 altitude_km: 400,
                 inclination: 51.6,
                 period_minutes: 90,
                 angle: Math.random() * Math.PI * 2,
                 isSatelliteRoot: true,
-                baseScale: normalizationScale
+                baseScale: normalizationScale,
+                isCustomSatellite: true
             };
 
             model.userData = customSatelliteData;
@@ -994,14 +1052,50 @@ submitSatelliteBtn.addEventListener('click', () => {
             satelliteMeshes.push(model);
             satellitesData.push(customSatelliteData);
 
+            // Create red orbit line for custom satellite
+            const orbitPoints = [];
+            const numPoints = 360;
+            const altitudeKm = customSatelliteData.altitude_km;
+            const r = SCENE_EARTH_RADIUS * (1 + altitudeKm / EARTH_RADIUS_KM);
+            const inclinationRad = THREE.MathUtils.degToRad(customSatelliteData.inclination);
+
+            for (let i = 0; i <= numPoints; i++) {
+                const angle = (i / numPoints) * Math.PI * 2;
+                const x = r * Math.cos(angle);
+                const z = r * Math.sin(angle);
+                const y = 0;
+
+                const vector = new THREE.Vector3(x, y, z);
+                vector.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclinationRad);
+                orbitPoints.push(vector);
+            }
+
+            const orbitGeometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+            const orbitMaterial = new THREE.LineBasicMaterial({
+                color: 0xff0000,
+                opacity: 0.6,
+                transparent: true
+            });
+            const orbitLine = new THREE.Line(orbitGeometry, orbitMaterial);
+            scene.add(orbitLine);
+            customSatelliteData.orbitLine = orbitLine;
+
+            // Add to dropdown menu
+            const satelliteIndex = satelliteMeshes.length - 1;
+            satelliteRegistry[satelliteIndex] = model;
+            const option = document.createElement('option');
+            option.value = satelliteIndex;
+            option.innerText = 'UFO';
+            satelliteSelect.appendChild(option);
+
             customSatelliteDialog.style.display = 'none';
             satelliteFileInput.value = '';
             customSatelliteFile = null;
 
-            alert('Custom satellite added successfully!');
+            showToast('Custom satellite added successfully! 🛰️', 'success');
         }, (error) => {
             console.error('Error loading custom satellite:', error);
-            alert('Failed to load GLB file. Please make sure its a valid GLB file.');
+            showToast('Failed to load GLB file. Please check the file.', 'error');
         });
     };
 
