@@ -19,7 +19,24 @@
 </head>
 
 <body>
-    <div id="loading">Loading Simulation...</div>
+    <div id="loading">
+        <div class="loading-rocket-container">
+            <svg class="loading-rocket-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#4facfe" d="M144 288v64c0 35.3 28.7 64 64 64v-64c0-17.7-14.3-32-32-32s-32-14.3-32-32z" />
+                <path fill="#4facfe" d="M368 288v64c0 35.3-28.7 64-64 64v-64c0-17.7 14.3-32 32-32s32-14.3 32-32z" />
+                <path fill="#e0e0e0"
+                    d="M256 16c-44.2 0-80 35.8-80 80v224c0 44.2 35.8 80 80 80s80-35.8 80-80V96c0-44.2-35.8-80-80-80z" />
+                <path fill="#666" d="M256 432c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z" />
+                <circle cx="256" cy="160" r="30" fill="#00f2fe" stroke="#333" stroke-width="5" />
+                <path fill="#ff6b6b" d="M176 96c0-44.2 35.8-80 80-80s80 35.8 80 80H176z" />
+                <path class="loading-exhaust" d="M256 460l-20 60h40l-20-60z" />
+            </svg>
+        </div>
+        <div class="loading-text">Loading Simulation...</div>
+        <div class="loading-progress-container">
+            <div class="loading-progress-bar" id="loadingProgressBar"></div>
+        </div>
+    </div>
     <div id="tooltip"></div>
 
 
@@ -35,22 +52,22 @@
     </div>
 
     <button id="reset-view-btn"
-        style="display: none; position: absolute; top: 70px; left: 20px; background: #ff4757; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; z-index: 1000; box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);">
+        style="display: none; position: absolute; top: 70px; left: 20px; background: #ff4757; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: 600; z-index: 1000; box-shadow: 0 0 10px rgba(255, 71, 87, 0.5); font-family: 'Inter', sans-serif; font-size: 0.9rem;">
         Reset View
     </button>
     <button id="switch-view-btn"
-        style="display: none; position: absolute; top: 70px; left: 140px; background: #4facfe; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; z-index: 1000; box-shadow: 0 0 10px rgba(79, 172, 254, 0.5);">
+        style="display: none; position: absolute; top: 70px; left: 140px; background: #4facfe; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: 600; z-index: 1000; box-shadow: 0 0 10px rgba(79, 172, 254, 0.5); font-family: 'Inter', sans-serif; font-size: 0.9rem;">
         Switch View
     </button>
 
     <button id="download-view-btn"
-        style="position: absolute; top: 20px; right: 20px; background: #2ecc71; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; z-index: 1000; box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);">
+        style="position: absolute; bottom: 20px; right: 20px; background: #2ecc71; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: 600; z-index: 1000; box-shadow: 0 0 10px rgba(46, 204, 113, 0.5); font-family: 'Inter', sans-serif; font-size: 0.9rem;">
         📸 Download View
     </button>
 
     <a href="{{ url_for('home') }}" id="back-to-station-btn"
-        style="position: absolute; top: 70px; right: 20px; background: rgba(79, 172, 254, 0.9); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; z-index: 1000; box-shadow: 0 0 10px rgba(79, 172, 254, 0.5); text-decoration: none; display: inline-block; font-family: 'Press Start 2P', cursive; font-size: 0.7rem;">
-        ← LAUNCHING STATION
+        style="position: absolute; bottom: 70px; right: 20px; background: rgba(79, 172, 254, 0.9); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: 600; z-index: 1000; box-shadow: 0 0 10px rgba(79, 172, 254, 0.5); text-decoration: none; display: inline-block; font-family: 'Inter', sans-serif; font-size: 0.9rem;">
+        Launch Pad
     </a>
 
     <div id="zoom-controls">
@@ -62,7 +79,7 @@
         style="position: fixed; bottom: 20px; left: 20px; background: rgba(20, 20, 30, 0.9); padding: 20px; border-radius: 10px; border: 1px solid #444; color: white; z-index: 1000; backdrop-filter: blur(5px); display: flex; flex-direction: column; gap: 15px; width: 220px;">
 
         <button id="play-pause-btn"
-            style="width: 100%; cursor: pointer; padding: 8px; background: #4facfe; border: none; color: white; border-radius: 5px; font-weight: bold; transition: background 0.2s;">Pause</button>
+            style="width: 100%; cursor: pointer; padding: 8px; background: #4facfe; border: none; color: white; border-radius: 5px; font-weight: 600; transition: background 0.2s; font-family: 'Inter', sans-serif; font-size: 0.9rem;">Pause</button>
 
         <div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">

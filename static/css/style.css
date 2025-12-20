@@ -56,18 +56,126 @@ body {
 }
 
 #loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+#loading.fade-out {
+    opacity: 0;
+}
+
+.loading-rocket-container {
     position: absolute;
-    top: 50%;
+    top: -100px;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
+    animation: rocketEntry 2s linear forwards, rocketFade 2s linear forwards;
+}
+
+.loading-rocket-svg {
+    width: 80px;
+    height: 120px;
+    filter: drop-shadow(0 0 10px rgba(79, 172, 254, 0.5));
+    transform: rotate(180deg);
+}
+
+.loading-exhaust {
+    opacity: 1;
+    fill: #ffce00;
+    animation: thrust 0.2s ease-in-out infinite;
+}
+
+@keyframes rocketEntry {
+    0% {
+        top: -100px;
+    }
+
+    100% {
+        top: calc(100vh + 100px);
+    }
+}
+
+@keyframes rocketFade {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes thrust {
+
+    0%,
+    100% {
+        transform: scaleY(1);
+    }
+
+    50% {
+        transform: scaleY(1.5);
+    }
+}
+
+.loading-text {
     color: white;
     font-size: 24px;
-    pointer-events: none;
+    margin-bottom: 30px;
+    font-family: 'Press Start 2P', cursive;
+    text-align: center;
+    animation: glow 1.5s ease-in-out infinite;
 }
+
+@keyframes glow {
+
+    0%,
+    100% {
+        text-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+    }
+
+    50% {
+        text-shadow: 0 0 20px rgba(79, 172, 254, 0.8), 0 0 30px rgba(0, 242, 254, 0.6);
+    }
+}
+
+.loading-progress-container {
+    width: 400px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.loading-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #4facfe, #00f2fe);
+    border-radius: 4px;
+    box-shadow: 0 0 10px #00f2fe;
+    transition: width 0.1s linear;
+}
+
 
 #zoom-controls {
     position: absolute;
-    bottom: 20px;
+    bottom: 120px;
     right: 20px;
     display: flex;
     flex-direction: column;

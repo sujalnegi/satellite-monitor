@@ -51,9 +51,42 @@ loader.load(window.APP_CONFIG.assetsBaseUrl + 'sun.glb', (gltf) => {
 const assetsBase = window.APP_CONFIG.assetsBaseUrl;
 
 let earthMesh;
+const loadingStartTime = Date.now();
+const LOADING_DURATION = 2000; 
+
+function hideLoadingScreen() {
+    const elapsed = Date.now() - loadingStartTime;
+    const remaining = Math.max(0, LOADING_DURATION - elapsed);
+
+    setTimeout(() => {
+        const loadingElement = document.getElementById('loading');
+        loadingElement.classList.add('fade-out');
+        setTimeout(() => {
+            loadingElement.style.display = 'none';
+        }, 500);
+    }, remaining);
+}
+
+function animateProgressBar() {
+    const progressBar = document.getElementById('loadingProgressBar');
+    const startTime = Date.now();
+
+    function updateProgress() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(100, (elapsed / LOADING_DURATION) * 100);
+        progressBar.style.width = progress + '%';
+
+        if (progress < 100) {
+            requestAnimationFrame(updateProgress);
+        }
+    }
+
+    requestAnimationFrame(updateProgress);
+}
+animateProgressBar();
 
 loader.load(window.APP_CONFIG.assetsBaseUrl + 'earth.glb', (gltf) => {
-    document.getElementById('loading').style.display = 'none';
+    hideLoadingScreen();
     const model = gltf.scene;
     earthMesh = model;
 
@@ -71,7 +104,11 @@ loader.load(window.APP_CONFIG.assetsBaseUrl + 'earth.glb', (gltf) => {
     earthGroup.add(model);
 }, undefined, (err) => {
     console.error("Error loading earth model", err);
-    document.getElementById('loading').innerText = "Error loading earth. Check console.";
+    hideLoadingScreen();
+    setTimeout(() => {
+        document.getElementById('loading').innerText = "Error loading earth. Check console.";
+        document.getElementById('loading').style.display = 'block';
+    }, LOADING_DURATION);
 });
 
 
@@ -253,7 +290,7 @@ satelliteSelect.addEventListener('change', (e) => {
 function getOrbitPoints(data, startTime) {
     if (!data.satrec) return [];
 
-    let period = 100; 
+    let period = 100;
     if (data.satrec.no) {
         period = (2 * Math.PI) / data.satrec.no;
     }
