@@ -103,7 +103,7 @@ body {
     }
 
     100% {
-        top: calc(100vh + 100px);
+        top: 50vh;
     }
 }
 
