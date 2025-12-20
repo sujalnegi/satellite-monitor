@@ -41,13 +41,20 @@
 * **3D Models:** GLTFLoader, DRACOLoader
 * **Frontend:** HTML5, CSS3, JavaScript 
 * **Fonts:** Press Start 2P (retro), Inter 
-## Demo
 
-Experience the live satellite tracking simulation with:
-- Real-time orbital mechanics
-- Interactive 3D models
-- Custom satellite uploads
-- Time manipulation features
+## Demo & Deployment
+
+### 🎥 Demo Video
+Watch a complete walkthrough of all features:
+
+[**Watch Demo Video**](https://drive.google.com/file/d/your-video-id/view?usp=sharing)
+
+### 🚀 Live Deployment
+Experience the live application:
+
+[**Launch Satellite Monitor**](https://your-deployment-url.com)
+
+---
 
 ## Local Setup and Installation
 
