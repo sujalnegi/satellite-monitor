@@ -21,16 +21,12 @@ controls.maxDistance = 20000;
 
 const ambientLight = new THREE.AmbientLight(0x404040, 2);
 scene.add(ambientLight);
-
 const hemiLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1.5);
 scene.add(hemiLight);
 
 const sunLight = new THREE.DirectionalLight(0xffffff, 2);
 sunLight.position.set(10000, 0, 0);
 scene.add(sunLight);
-
-
-
 const earthGroup = new THREE.Group();
 scene.add(earthGroup);
 
@@ -66,7 +62,6 @@ function hideLoadingScreen() {
         }, 500);
     }, remaining);
 }
-
 function animateProgressBar() {
     const progressBar = document.getElementById('loadingProgressBar');
     const startTime = Date.now();
@@ -110,9 +105,6 @@ loader.load(window.APP_CONFIG.assetsBaseUrl + 'earth.glb', (gltf) => {
         document.getElementById('loading').style.display = 'block';
     }, LOADING_DURATION);
 });
-
-
-
 function createStarfield() {
     const starGeo = new THREE.BufferGeometry();
     const starCount = 5000;
@@ -122,11 +114,9 @@ function createStarfield() {
         const r = 1000 + Math.random() * 2000;
         const theta = 2 * Math.PI * Math.random();
         const phi = Math.acos(2 * Math.random() - 1);
-
         const x = r * Math.sin(phi) * Math.cos(theta);
         const y = r * Math.sin(phi) * Math.sin(theta);
         const z = r * Math.cos(phi);
-
         positions[i * 3] = x;
         positions[i * 3 + 1] = y;
         positions[i * 3 + 2] = z;
@@ -140,19 +130,16 @@ function createStarfield() {
         transparent: true,
         opacity: 0.8
     });
-
     const stars = new THREE.Points(starGeo, starMat);
     scene.add(stars);
 }
 createStarfield();
-
 function createNebula() {
     const nebulaGeo = new THREE.BufferGeometry();
     const nebulaCount = 3000;
     const positions = new Float32Array(nebulaCount * 3);
     const colors = new Float32Array(nebulaCount * 3);
     const sizes = new Float32Array(nebulaCount);
-
     const nebulaColors = [
         new THREE.Color(0x4a0e4e),
         new THREE.Color(0x1e3a8a),
@@ -161,16 +148,13 @@ function createNebula() {
         new THREE.Color(0x581c87),
         new THREE.Color(0x0c4a6e)
     ];
-
     for (let i = 0; i < nebulaCount; i++) {
         const r = 2000 + Math.random() * 3000;
         const theta = 2 * Math.PI * Math.random();
         const phi = Math.acos(2 * Math.random() - 1);
-
         positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
         positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
         positions[i * 3 + 2] = r * Math.cos(phi);
-
         const color = nebulaColors[Math.floor(Math.random() * nebulaColors.length)];
         colors[i * 3] = color.r;
         colors[i * 3 + 1] = color.g;
@@ -178,7 +162,6 @@ function createNebula() {
 
         sizes[i] = 50 + Math.random() * 150;
     }
-
     nebulaGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     nebulaGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     nebulaGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
@@ -197,9 +180,6 @@ function createNebula() {
     scene.add(nebula);
 }
 createNebula();
-
-
-
 let moonMesh;
 const MOON_DISTANCE = 250;
 const MOON_RADIUS = 13.5;
@@ -207,18 +187,14 @@ const MOON_RADIUS = 13.5;
 loader.load(window.APP_CONFIG.assetsBaseUrl + 'moon.glb', (gltf) => {
     const model = gltf.scene;
     moonMesh = model;
-
     const box = new THREE.Box3().setFromObject(model);
     const size = new THREE.Vector3();
     box.getSize(size);
     const maxDim = Math.max(size.x, size.y, size.z);
-
     const targetDiameter = MOON_RADIUS * 2;
     const scale = (targetDiameter / maxDim);
     model.scale.set(scale, scale, scale);
-
     model.position.set(MOON_DISTANCE, 0, 0);
-
     model.traverse((child) => {
         if (child.isMesh) {
             child.castShadow = true;
@@ -228,7 +204,6 @@ loader.load(window.APP_CONFIG.assetsBaseUrl + 'moon.glb', (gltf) => {
             }
         }
     });
-
     scene.add(model);
 }, undefined, (error) => {
     console.error("Error loading moon model", error);
@@ -238,10 +213,6 @@ loader.load(window.APP_CONFIG.assetsBaseUrl + 'moon.glb', (gltf) => {
     moonMesh.position.set(MOON_DISTANCE, 0, 0);
     scene.add(moonMesh);
 });
-
-
-
-
 const satelliteMeshes = [];
 const satellitesData = [];
 const satelliteRegistry = {};
@@ -313,29 +284,24 @@ function getOrbitPoints(data, startTime) {
     }
     return points;
 }
-
 function updateOrbitPath(data, time) {
     if (!data.orbitLine || !data.satrec) return;
     const points = getOrbitPoints(data, time);
     data.orbitLine.geometry.setFromPoints(points);
     data.lastOrbitUpdate = new Date(time.getTime());
 }
-
 function createOrbitPath(data) {
     if (!data.tle1 || !data.tle2) return;
 
     if (!data.satrec) {
         data.satrec = satellite.twoline2satrec(data.tle1, data.tle2);
     }
-
     const points = getOrbitPoints(data, new Date());
     const geo = new THREE.BufferGeometry().setFromPoints(points);
     const mat = new THREE.LineBasicMaterial({ color: 0xeeeeee, opacity: 0.3, transparent: true });
     const line = new THREE.Line(geo, mat);
-
     data.orbitLine = line;
     data.lastOrbitUpdate = new Date();
-
     scene.add(line);
 }
 
@@ -355,7 +321,6 @@ function createSatellite(data, index) {
                 }
             }
         });
-
         const box = new THREE.Box3().setFromObject(model);
         const size = new THREE.Vector3();
         box.getSize(size);
@@ -379,13 +344,10 @@ function createSatellite(data, index) {
         const geometry = new THREE.SphereGeometry(3.0, 16, 16);
         const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         const mesh = new THREE.Mesh(geometry, material);
-
-
         const globalScale = parseFloat(document.getElementById('scale-slider').value);
         mesh.userData = { ...data, angle: Math.random() * Math.PI * 2, isSatelliteRoot: true, baseScale: 40.0 };
         const s = globalScale * 40.0;
         mesh.scale.set(s, s, s);
-
         scene.add(mesh);
         satelliteMeshes.push(mesh);
         satellitesData.push(data);
@@ -411,7 +373,6 @@ function zoomOut() {
     camera.position.copy(controls.target).add(direction.multiplyScalar(newDistance));
     controls.update();
 }
-
 document.getElementById('zoom-in').addEventListener('click', zoomIn);
 document.getElementById('zoom-out').addEventListener('click', zoomOut);
 
@@ -428,19 +389,20 @@ scaleSlider.addEventListener('input', (e) => {
         mesh.scale.set(finalScale, finalScale, finalScale);
     });
 });
-
 const clock = new THREE.Clock();
 const REAL_SEC_TO_SIM_SEC = 3600;
 const EARTH_RADIUS_KM = 6371;
 const SCENE_EARTH_RADIUS = 50;
 
 let timeScaleFactor = 0.1;
+let isReversed = false;
 const speedSlider = document.getElementById('speed-slider');
 const speedValueDisplay = document.getElementById('speed-value');
 
 speedSlider.addEventListener('input', (e) => {
-    timeScaleFactor = parseFloat(e.target.value);
-    speedValueDisplay.innerText = timeScaleFactor.toFixed(2) + "x";
+    const newSpeed = parseFloat(e.target.value);
+    timeScaleFactor = isReversed ? -newSpeed : newSpeed;
+    speedValueDisplay.innerText = newSpeed.toFixed(2) + "x";
 });
 
 let isPaused = false;
@@ -451,8 +413,30 @@ function togglePlayPause() {
     playPauseBtn.innerText = isPaused ? "Play" : "Pause";
     playPauseBtn.style.background = isPaused ? "#28a745" : "#4facfe";
 }
-
 playPauseBtn.addEventListener('click', togglePlayPause);
+const reverseTimeBtn = document.getElementById('reverse-time-btn');
+
+function toggleReverseTime() {
+    isReversed = !isReversed;
+
+    if (isReversed) {
+        if (timeScaleFactor > 0) {
+            timeScaleFactor = -timeScaleFactor;
+        }
+        reverseTimeBtn.innerText = "⏩ Forward Time";
+        reverseTimeBtn.style.background = "#e67e22";
+    } else {
+        if (timeScaleFactor < 0) {
+            timeScaleFactor = -timeScaleFactor;
+        }
+        reverseTimeBtn.innerText = "⏪ Reverse Time";
+        reverseTimeBtn.style.background = "#9b59b6";
+    }
+
+    speedSlider.value = Math.abs(timeScaleFactor);
+    speedValueDisplay.innerText = Math.abs(timeScaleFactor).toFixed(2) + "x";
+}
+reverseTimeBtn.addEventListener('click', toggleReverseTime);
 
 const keyState = {
     ArrowLeft: false,
@@ -460,7 +444,6 @@ const keyState = {
     ArrowUp: false,
     ArrowDown: false
 };
-
 window.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
         e.preventDefault();
@@ -476,34 +459,24 @@ window.addEventListener('keyup', (e) => {
         keyState[e.code] = false;
     }
 });
-
-
 function updateSatellites(delta) {
     if (!window.simTime) window.simTime = new Date();
     if (!isPaused) {
         window.simTime = new Date(window.simTime.getTime() + delta * 1000 * REAL_SEC_TO_SIM_SEC * timeScaleFactor);
     }
-
     const now = window.simTime;
 
     if (earthMesh) {
         const gmst = satellite.gstime(now);
         earthMesh.rotation.y = gmst;
     }
-
-
-
-
-
     if (moonMesh) {
         const moonPeriod = 2332800;
 
         const moonSpeed = (2 * Math.PI) / moonPeriod;
-
         if (!isPaused) {
             moonMesh.rotation.y += moonSpeed * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
         }
-
         const currentAngle = Math.atan2(moonMesh.position.z, moonMesh.position.x);
         let newAngle = currentAngle;
 
@@ -514,7 +487,6 @@ function updateSatellites(delta) {
         moonMesh.position.x = MOON_DISTANCE * Math.cos(newAngle);
         moonMesh.position.z = MOON_DISTANCE * Math.sin(newAngle);
     }
-
     satelliteMeshes.forEach(mesh => {
         const data = mesh.userData;
 
@@ -522,7 +494,6 @@ function updateSatellites(delta) {
             if (!data.satrec) {
                 data.satrec = satellite.twoline2satrec(data.tle1, data.tle2);
             }
-
             const positionAndVelocity = satellite.propagate(data.satrec, now);
             const positionEci = positionAndVelocity.position;
 
@@ -553,14 +524,12 @@ function updateSatellites(delta) {
             if (!isPaused) {
                 data.angle += angularSpeed * delta * REAL_SEC_TO_SIM_SEC * timeScaleFactor;
             }
-
             const altitudeKm = data.altitude_km;
             const r = SCENE_EARTH_RADIUS * (1 + altitudeKm / EARTH_RADIUS_KM);
 
             const x = r * Math.cos(data.angle);
             const z = r * Math.sin(data.angle);
             const y = 0;
-
             const vector = new THREE.Vector3(x, y, z);
             const inclinationRad = THREE.MathUtils.degToRad(data.inclination);
             vector.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclinationRad);
@@ -578,8 +547,8 @@ function updateSatellites(delta) {
 }
 
 function onMouseMove(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    mouse.x = (event.clientX/window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY/window.innerHeight) * 2 + 1;
 
     if (!lockedSatellite) {
         checkIntersection();

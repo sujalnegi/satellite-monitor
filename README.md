@@ -1,6 +1,7 @@
 # Satellite Monitor
 
 <div align="center">
+<img src="static/images/logo.svg" alt="Logo" width="400"/>
 
 **Satellite Monitor is an imersice 3D Simulation of Earth and a few of its satellites that revolve around it. Explore the vast space of "space" where you can change sim speed model scaleing and more.**
 
@@ -33,6 +34,14 @@
     * Fully responsive design that works on all devices.
     * Intuitive controls and satellite information panels.
 
+## Demo Viddeo & Deployed Link
+
+Demo Video: [Here](https://drive.google.com/file/d/1LuYNKn6xBX_GNBrNnHbWcLhoiGdyBZMh/view?usp=drive_link)
+
+Deploy Linke is [Here](https://satellite-monitor-k6jo.onrender.com)
+
+
+
 ## Technologies Used
 
 * **Backend:** Python, Flask
@@ -42,19 +51,6 @@
 * **Frontend:** HTML5, CSS3, JavaScript 
 * **Fonts:** Press Start 2P (retro), Inter 
 
-## Demo & Deployment
-
-### 🎥 Demo Video
-Watch a complete walkthrough of all features:
-
-[**Watch Demo Video**](https://drive.google.com/file/d/your-video-id/view?usp=sharing)
-
-### 🚀 Live Deployment
-Experience the live application:
-
-[**Launch Satellite Monitor**](https://your-deployment-url.com)
-
----
 
 ## Local Setup and Installation
 

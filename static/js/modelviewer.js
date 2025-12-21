@@ -15,7 +15,6 @@ const modelsData = {
     'Sun': { file: 'sun.glb', scale: 1, name: 'Sun' },
     'UFO': { file: 'ufo.glb', scale: 1, name: 'UFO' }
 };
-
 class ModelViewer {
     constructor() {
         this.scene = null;
@@ -27,10 +26,8 @@ class ModelViewer {
         this.container = document.getElementById('canvas-container');
         this.loadingOverlay = document.getElementById('loadingOverlay');
         this.errorMessage = document.getElementById('errorMessage');
-
         this.init();
     }
-
     init() {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x2a2a2a);
@@ -63,11 +60,8 @@ class ModelViewer {
 
         this.setupLights();
         this.setupGrid();
-
         this.loadModel();
-
         window.addEventListener('resize', () => this.onWindowResize());
-
         this.animate();
     }
 
@@ -90,13 +84,11 @@ class ModelViewer {
         const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.4);
         this.scene.add(hemiLight);
     }
-
     setupGrid() {
         const gridHelper = new THREE.GridHelper(20, 20, 0x666666, 0x444444);
         gridHelper.position.y = -2;
         this.scene.add(gridHelper);
     }
-
     loadModel() {
         const modelInfo = modelsData[this.modelName];
 
@@ -104,18 +96,13 @@ class ModelViewer {
             this.showError('Model not found');
             return;
         }
-
         document.getElementById('modelTitle').textContent = modelInfo.name;
-
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
         dracoLoader.setDecoderConfig({ type: 'js' });
-
         const loader = new GLTFLoader();
         loader.setDRACOLoader(dracoLoader);
-
         const modelPath = `/static/assets/${modelInfo.file}`;
-
         loader.load(
             modelPath,
             (gltf) => {
@@ -128,13 +115,11 @@ class ModelViewer {
                 this.model.position.x = -center.x;
                 this.model.position.y = -center.y;
                 this.model.position.z = -center.z;
-
                 const size = box.getSize(new THREE.Vector3());
                 const maxDim = Math.max(size.x, size.y, size.z);
                 const fov = this.camera.fov * (Math.PI / 180);
                 let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
                 cameraZ *= 2.5;
-
                 this.camera.position.set(cameraZ, cameraZ * 0.6, cameraZ);
                 this.camera.lookAt(0, 0, 0);
                 this.controls.target.set(0, 0, 0);
@@ -158,17 +143,14 @@ class ModelViewer {
         this.errorMessage.style.display = 'block';
         this.errorMessage.querySelector('p').textContent = message;
     }
-
     onWindowResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     }
-
     animate() {
         requestAnimationFrame(() => this.animate());
         this.controls.update();
-
         this.renderer.render(this.scene, this.camera);
     }
 }
