@@ -57,9 +57,7 @@ function hideLoadingScreen() {
     setTimeout(() => {
         const loadingElement = document.getElementById('loading');
         loadingElement.classList.add('fade-out');
-        setTimeout(() => {
-            loadingElement.style.display = 'none';
-        }, 500);
+        setTimeout(() => loadingElement.style.display = 'none', 500);
     }, remaining);
 }
 function animateProgressBar() {
@@ -69,7 +67,7 @@ function animateProgressBar() {
     function updateProgress() {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(100, (elapsed / LOADING_DURATION) * 100);
-        progressBar.style.width = progress + '%';
+        progressBar.style.width = `${progress}%`;
 
         if (progress < 100) {
             requestAnimationFrame(updateProgress);
@@ -89,28 +87,29 @@ loader.load(window.APP_CONFIG.assetsBaseUrl + 'earth.glb', (gltf) => {
     const size = new THREE.Vector3();
     box.getSize(size);
     const maxDim = Math.max(size.x, size.y, size.z);
-    const targetDiameter = 100;
+    const TARGET_EARTH_DIAMETER = 100;
 
     if (maxDim > 0) {
-        const scale = targetDiameter / maxDim;
+        const scale = TARGET_EARTH_DIAMETER / maxDim;
         model.scale.set(scale, scale, scale);
     }
 
     earthGroup.add(model);
 }, undefined, (err) => {
-    console.error("Error loading earth model", err);
+    console.error('Error loading earth model:', err);
     hideLoadingScreen();
     setTimeout(() => {
-        document.getElementById('loading').innerText = "Error loading earth. Check console.";
-        document.getElementById('loading').style.display = 'block';
+        const loadingElement = document.getElementById('loading');
+        loadingElement.innerText = 'Error loading earth. Check console.';
+        loadingElement.style.display = 'block';
     }, LOADING_DURATION);
 });
 function createStarfield() {
     const starGeo = new THREE.BufferGeometry();
-    const starCount = 5000;
-    const positions = new Float32Array(starCount * 3);
+    const STAR_COUNT = 5000;
+    const positions = new Float32Array(STAR_COUNT * 3);
 
-    for (let i = 0; i < starCount; i++) {
+    for (let i = 0; i < STAR_COUNT; i++) {
         const r = 1000 + Math.random() * 2000;
         const theta = 2 * Math.PI * Math.random();
         const phi = Math.acos(2 * Math.random() - 1);
@@ -136,10 +135,10 @@ function createStarfield() {
 createStarfield();
 function createNebula() {
     const nebulaGeo = new THREE.BufferGeometry();
-    const nebulaCount = 3000;
-    const positions = new Float32Array(nebulaCount * 3);
-    const colors = new Float32Array(nebulaCount * 3);
-    const sizes = new Float32Array(nebulaCount);
+    const NEBULA_COUNT = 3000;
+    const positions = new Float32Array(NEBULA_COUNT * 3);
+    const colors = new Float32Array(NEBULA_COUNT * 3);
+    const sizes = new Float32Array(NEBULA_COUNT);
     const nebulaColors = [
         new THREE.Color(0x4a0e4e),
         new THREE.Color(0x1e3a8a),
@@ -148,7 +147,8 @@ function createNebula() {
         new THREE.Color(0x581c87),
         new THREE.Color(0x0c4a6e)
     ];
-    for (let i = 0; i < nebulaCount; i++) {
+
+    for (let i = 0; i < NEBULA_COUNT; i++) {
         const r = 2000 + Math.random() * 3000;
         const theta = 2 * Math.PI * Math.random();
         const phi = Math.acos(2 * Math.random() - 1);
@@ -162,6 +162,7 @@ function createNebula() {
 
         sizes[i] = 50 + Math.random() * 150;
     }
+
     nebulaGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     nebulaGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     nebulaGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
@@ -192,7 +193,7 @@ loader.load(window.APP_CONFIG.assetsBaseUrl + 'moon.glb', (gltf) => {
     box.getSize(size);
     const maxDim = Math.max(size.x, size.y, size.z);
     const targetDiameter = MOON_RADIUS * 2;
-    const scale = (targetDiameter / maxDim);
+    const scale = targetDiameter / maxDim;
     model.scale.set(scale, scale, scale);
     model.position.set(MOON_DISTANCE, 0, 0);
     model.traverse((child) => {
@@ -206,7 +207,7 @@ loader.load(window.APP_CONFIG.assetsBaseUrl + 'moon.glb', (gltf) => {
     });
     scene.add(model);
 }, undefined, (error) => {
-    console.error("Error loading moon model", error);
+    console.error('Error loading moon model:', error);
     const geometry = new THREE.SphereGeometry(MOON_RADIUS, 32, 32);
     const material = new THREE.MeshPhongMaterial({ color: 0x888888 });
     moonMesh = new THREE.Mesh(geometry, material);
@@ -241,20 +242,18 @@ fetch(window.APP_CONFIG.satellitesDataUrl)
             satelliteSelect.appendChild(option);
         });
     })
-    .catch(err => console.error("Error loading satellite data", err));
+    .catch(err => console.error('Error loading satellite data:', err));
 
 satelliteSelect.addEventListener('change', (e) => {
     const selectedIndex = e.target.value;
 
-    if (selectedIndex === "") {
+    if (selectedIndex === '') {
         satelliteMeshes.forEach(mesh => mesh.visible = true);
         unlockSatellite();
     } else {
         const targetMesh = satelliteRegistry[selectedIndex];
-        if (targetMesh) {
-            if (lockedSatellite !== targetMesh) {
-                lockOnSatellite(targetMesh);
-            }
+        if (targetMesh && lockedSatellite !== targetMesh) {
+            lockOnSatellite(targetMesh);
         }
     }
 });
@@ -410,8 +409,8 @@ const playPauseBtn = document.getElementById('play-pause-btn');
 
 function togglePlayPause() {
     isPaused = !isPaused;
-    playPauseBtn.innerText = isPaused ? "Play" : "Pause";
-    playPauseBtn.style.background = isPaused ? "#28a745" : "#4facfe";
+    playPauseBtn.innerText = isPaused ? 'Play' : 'Pause';
+    playPauseBtn.style.background = isPaused ? '#28a745' : '#4facfe';
 }
 playPauseBtn.addEventListener('click', togglePlayPause);
 const reverseTimeBtn = document.getElementById('reverse-time-btn');
@@ -420,21 +419,17 @@ function toggleReverseTime() {
     isReversed = !isReversed;
 
     if (isReversed) {
-        if (timeScaleFactor > 0) {
-            timeScaleFactor = -timeScaleFactor;
-        }
-        reverseTimeBtn.innerText = "⏩ Forward Time";
-        reverseTimeBtn.style.background = "#e67e22";
+        if (timeScaleFactor > 0) timeScaleFactor = -timeScaleFactor;
+        reverseTimeBtn.innerText = '⏩ Forward Time';
+        reverseTimeBtn.style.background = '#e67e22';
     } else {
-        if (timeScaleFactor < 0) {
-            timeScaleFactor = -timeScaleFactor;
-        }
-        reverseTimeBtn.innerText = "⏪ Reverse Time";
-        reverseTimeBtn.style.background = "#9b59b6";
+        if (timeScaleFactor < 0) timeScaleFactor = -timeScaleFactor;
+        reverseTimeBtn.innerText = '⏪ Reverse Time';
+        reverseTimeBtn.style.background = '#9b59b6';
     }
 
     speedSlider.value = Math.abs(timeScaleFactor);
-    speedValueDisplay.innerText = Math.abs(timeScaleFactor).toFixed(2) + "x";
+    speedValueDisplay.innerText = `${Math.abs(timeScaleFactor).toFixed(2)}x`;
 }
 reverseTimeBtn.addEventListener('click', toggleReverseTime);
 
@@ -547,8 +542,8 @@ function updateSatellites(delta) {
 }
 
 function onMouseMove(event) {
-    mouse.x = (event.clientX/window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY/window.innerHeight) * 2 + 1;
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     if (!lockedSatellite) {
         checkIntersection();
@@ -642,19 +637,19 @@ function playClickSound() {
 
 function showInfoPanel(data) {
     infoPanel.style.display = 'block';
-    document.getElementById('sat-name').innerText = data.name || "Unknown";
-    document.getElementById('sat-agency').innerText = data.agency || "N/A";
-    document.getElementById('sat-launch').innerText = data.launch || "N/A";
-    document.getElementById('sat-radius').innerText = (data.altitude_km ? data.altitude_km + " km" : "N/A");
-    document.getElementById('sat-inclination').innerText = (data.inclination ? data.inclination + "°" : "N/A");
-    document.getElementById('sat-period').innerText = (data.period_minutes ? data.period_minutes + " min" : "N/A");
+    document.getElementById('sat-name').innerText = data.name || 'Unknown';
+    document.getElementById('sat-agency').innerText = data.agency || 'N/A';
+    document.getElementById('sat-launch').innerText = data.launch || 'N/A';
+    document.getElementById('sat-radius').innerText = data.altitude_km ? `${data.altitude_km} km` : 'N/A';
+    document.getElementById('sat-inclination').innerText = data.inclination ? `${data.inclination}°` : 'N/A';
+    document.getElementById('sat-period').innerText = data.period_minutes ? `${data.period_minutes} min` : 'N/A';
 
     if (data.altitude_km) {
         const r = 6371 + data.altitude_km;
         const v = Math.sqrt(398600 / r);
-        document.getElementById('sat-speed').innerText = v.toFixed(2) + " km/s";
+        document.getElementById('sat-speed').innerText = `${v.toFixed(2)} km/s`;
     } else {
-        document.getElementById('sat-speed').innerText = "N/A";
+        document.getElementById('sat-speed').innerText = 'N/A';
     }
 }
 
@@ -827,22 +822,22 @@ function lockOnSatellite(mesh, forceUpdate = false) {
 }
 
 function getSatelliteMessage(name) {
-    if (!name) return "Hey!! I am here";
+    if (!name) return 'Hey!! I am here';
     const n = name.toLowerCase();
 
-    if (n.includes('sputnik')) return "I started it all... Beep beep!";
-    if (n.includes('hubble')) return "Peering into the deep universe!";
-    if (n.includes('iss') || n.includes('station')) return "Humans live inside me!";
-    if (n.includes('voyager')) return "I am going very far away...";
-    if (n.includes('gps')) return "Recalculating your route...";
-    if (n.includes('starlink')) return "Providing internet from above!";
-    if (n.includes('james webb')) return "Unfolding the cosmos history.";
-    if (n.includes('telescope')) return "Watching the stars.";
-    if (n.includes('goes')) return "Tracking storms and weather!";
+    if (n.includes('sputnik')) return 'I started it all... Beep beep!';
+    if (n.includes('hubble')) return 'Peering into the deep universe!';
+    if (n.includes('iss') || n.includes('station')) return 'Humans live inside me!';
+    if (n.includes('voyager')) return 'I am going very far away...';
+    if (n.includes('gps')) return 'Recalculating your route...';
+    if (n.includes('starlink')) return 'Providing internet from above!';
+    if (n.includes('james webb')) return 'Unfolding the cosmos history.';
+    if (n.includes('telescope')) return 'Watching the stars.';
+    if (n.includes('goes')) return 'Tracking storms and weather!';
     if (n.includes('aqua')) return "Observing Earth's water cycle.";
     if (n.includes('jason')) return "Mapping the ocean's surface height.";
 
-    return "Hey!! I am here";
+    return 'Hey!! I am here';
 }
 
 
@@ -853,7 +848,7 @@ function unlockSatellite() {
         lockedSatellite = null;
         lastLockedSatPos = null;
         infoPanel.style.display = 'none';
-        document.getElementById('satellite-select').value = "";
+        document.getElementById('satellite-select').value = '';
         satelliteMeshes.forEach(mesh => mesh.visible = true);
         document.getElementById('reset-view-btn').style.display = 'none';
         document.getElementById('switch-view-btn').style.display = 'none';
@@ -873,8 +868,7 @@ document.getElementById('reset-view-btn').addEventListener('click', () => {
 
 document.getElementById('switch-view-btn').addEventListener('click', () => {
     if (!lockedSatellite) return;
-    viewMode = (viewMode === 'ORBIT') ? 'HORIZON' : 'ORBIT';
-
+    viewMode = viewMode === 'ORBIT' ? 'HORIZON' : 'ORBIT';
     lockOnSatellite(lockedSatellite, true);
 });
 
@@ -899,17 +893,24 @@ document.getElementById('download-view-btn').addEventListener('click', () => {
         camera.updateProjectionMatrix();
     } catch (error) {
         console.error('Error downloading view:', error);
-        alert('Failed to download view. Please try again.');
+        showToast('Failed to download view. Please try again.', 'error');
     }
 });
-
-// Toast Notification System
 function showToast(message, type = 'success') {
     const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        console.warn('Toast container not found');
+        return;
+    }
+
+    const colorMap = {
+        success: '#2ecc71',
+        error: '#e74c3c',
+        info: '#4facfe'
+    };
+    const bgColor = colorMap[type] || colorMap.info;
+
     const toast = document.createElement('div');
-
-    const bgColor = type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : '#4facfe';
-
     toast.style.cssText = `
         background: ${bgColor};
         color: white;
@@ -921,44 +922,47 @@ function showToast(message, type = 'success') {
         font-weight: 600;
         animation: slideIn 0.3s ease-out;
         max-width: 300px;
+        word-wrap: break-word;
     `;
 
     toast.textContent = message;
     toastContainer.appendChild(toast);
 
+    const TOAST_DURATION = 3000;
+    const FADE_DURATION = 300;
     setTimeout(() => {
         toast.style.animation = 'slideOut 0.3s ease-out';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+        setTimeout(() => toast.remove(), FADE_DURATION);
+    }, TOAST_DURATION);
 }
 
-// Add CSS animations for toast
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
+(function () {
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
-        to {
-            transform: translateX(0);
-            opacity: 1;
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
         }
-    }
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
+    `;
+    document.head.appendChild(style);
+})();
 
-// Custom Satellite Upload
 const addSatelliteBtn = document.getElementById('add-satellite-btn');
 const customSatelliteDialog = document.getElementById('custom-satellite-dialog');
 const cancelSatelliteBtn = document.getElementById('cancel-satellite-btn');
@@ -978,7 +982,14 @@ cancelSatelliteBtn.addEventListener('click', () => {
 });
 
 satelliteFileInput.addEventListener('change', (e) => {
-    customSatelliteFile = e.target.files[0];
+    const file = e.target.files[0];
+    if (file && !file.name.toLowerCase().endsWith('.glb')) {
+        showToast('Please select a valid GLB file', 'error');
+        satelliteFileInput.value = '';
+        customSatelliteFile = null;
+        return;
+    }
+    customSatelliteFile = file;
 });
 
 submitSatelliteBtn.addEventListener('click', () => {
@@ -988,6 +999,7 @@ submitSatelliteBtn.addEventListener('click', () => {
     }
 
     const reader = new FileReader();
+
     reader.onload = (e) => {
         const arrayBuffer = e.target.result;
 
@@ -998,8 +1010,8 @@ submitSatelliteBtn.addEventListener('click', () => {
             const size = new THREE.Vector3();
             box.getSize(size);
             const maxDim = Math.max(size.x, size.y, size.z);
-            const targetBaseSize = 250;
-            const normalizationScale = (maxDim > 0) ? (targetBaseSize / maxDim) : 1.0;
+            const TARGET_MODEL_SIZE = 250;
+            const normalizationScale = maxDim > 0 ? TARGET_MODEL_SIZE / maxDim : 1.0;
 
             const globalScale = parseFloat(document.getElementById('scale-slider').value);
             const finalScale = globalScale * normalizationScale;
@@ -1021,17 +1033,16 @@ submitSatelliteBtn.addEventListener('click', () => {
             satelliteMeshes.push(model);
             satellitesData.push(customSatelliteData);
 
-            // Create red orbit line for custom satellite
             const orbitPoints = [];
-            const numPoints = 360;
+            const ORBIT_SEGMENTS = 360;
             const altitudeKm = customSatelliteData.altitude_km;
-            const r = SCENE_EARTH_RADIUS * (1 + altitudeKm / EARTH_RADIUS_KM);
+            const orbitRadius = SCENE_EARTH_RADIUS * (1 + altitudeKm / EARTH_RADIUS_KM);
             const inclinationRad = THREE.MathUtils.degToRad(customSatelliteData.inclination);
 
-            for (let i = 0; i <= numPoints; i++) {
-                const angle = (i / numPoints) * Math.PI * 2;
-                const x = r * Math.cos(angle);
-                const z = r * Math.sin(angle);
+            for (let i = 0; i <= ORBIT_SEGMENTS; i++) {
+                const angle = (i / ORBIT_SEGMENTS) * Math.PI * 2;
+                const x = orbitRadius * Math.cos(angle);
+                const z = orbitRadius * Math.sin(angle);
                 const y = 0;
 
                 const vector = new THREE.Vector3(x, y, z);
@@ -1049,7 +1060,6 @@ submitSatelliteBtn.addEventListener('click', () => {
             scene.add(orbitLine);
             customSatelliteData.orbitLine = orbitLine;
 
-            // Add to dropdown menu
             const satelliteIndex = satelliteMeshes.length - 1;
             satelliteRegistry[satelliteIndex] = model;
             const option = document.createElement('option');
@@ -1066,6 +1076,11 @@ submitSatelliteBtn.addEventListener('click', () => {
             console.error('Error loading custom satellite:', error);
             showToast('Failed to load GLB file. Please check the file.', 'error');
         });
+    };
+
+    reader.onerror = () => {
+        console.error('Error reading file');
+        showToast('Failed to read file. Please try again.', 'error');
     };
 
     reader.readAsArrayBuffer(customSatelliteFile);

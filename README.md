@@ -1,7 +1,7 @@
 # Satellite Monitor
 
 <div align="center">
-<img src="static/images/logo.svg" alt="Logo" width="400"/>
+<img src="static/images/logo.svg" alt="Logo" width="600"/>
 
 **Satellite Monitor is an imersice 3D Simulation of Earth and a few of its satellites that revolve around it. Explore the vast space of "space" where you can change sim speed model scaleing and more.**
 
@@ -139,6 +139,10 @@ You should see the **Satellite Tracker** application running!
 - **Reset View:** Click the reset button when tracking a satellite
 - **Switch View:** Toggle between Earth and satellite perspectives
 
+### Capture Simulation
+-Use the **Download Btn** to donwload the current state of the simulation.
+-The current state of the simulation is saved as a png file.
+
 ## Project Structure
 
 ```
@@ -165,10 +169,6 @@ satellite-monitor/
 - Email: [sujal1negi@gmail.com](mailto:sujal1negi@gmail.com)
 - Instagram: [@_sujalnegi_](https://www.instagram.com/_sujalnegi_/)
 - GitHub: [sujalnegi](https://github.com/sujalnegi)
-
-## License
-
-This project is open source and available for educational purposes(use however). 
 
 ## Acknowledgments/Credits
 
